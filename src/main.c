@@ -4,13 +4,16 @@
 int main() {
     enable_dbgu();
     int i = 128;
-    printf("test %d \r\n", 0x41);
+    printf("test %c \r\n", 0x41);
     printf("test %s\r\n", "hi");
     printf("test %x\r\n", i);
     printf("test %p\r\n", &i);
-//    transmit_string("abds\r\n");
-//    transmit_byte(0x0d);
-//    transmit_byte(0x0c);
+
+    char rcv;
+    while(1) {
+        rcv = (char) receive_byte();
+        printf("You have typed: %c\r\n", rcv);
+    }
 
     return 0;
 }

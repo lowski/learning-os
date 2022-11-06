@@ -6,4 +6,6 @@ void transmit_byte(unsigned char);
 void transmit_string(const char*);
 void printf(const char*, ...);
 
+unsigned int receive_byte(void);
+
 #endif //LEARNING_OS_SERIAL_H

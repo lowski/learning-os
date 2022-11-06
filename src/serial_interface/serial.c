@@ -65,7 +65,7 @@ static volatile struct dbgu_mm * const dbgu = (struct dbgu_mm *)DBGU;
 
 // enable DBGU transmitter (26.4.3)
 void enable_dbgu(void) {
-    dbgu->cr = (1 << 6); // for offset see dbgu_mm_cr
+    dbgu->cr = (1 << 6) | (1 << 4); // for offset see dbgu_mm_cr
 }
 
 void transmit_byte(unsigned char byte) {
@@ -73,6 +73,12 @@ void transmit_byte(unsigned char byte) {
     for (; dbgu->sr_txrdy != 1;) {}
 
     dbgu->thr = byte;
+}
+
+unsigned int receive_byte() {
+    while (dbgu->sr_rxrdy != 1);
+
+    return dbgu->rhr;
 }
 
 void transmit_string(const char* str) {
@@ -121,7 +127,7 @@ void printf(const char* fmt, ...) {
         const char c = fmt[i];
         if (escape) {
             // no handling if the type is wrong.
-            if (c == 'd') {
+            if (c == 'c') {
                     transmit_byte(va_arg(args, unsigned int));
             } else if (c == 's') {
                     transmit_string(va_arg(args, const char*));
@@ -157,8 +163,6 @@ void printf(const char* fmt, ...) {
     }
 
     va_end(args);
-
-
 
     for (; dbgu->sr_txempty != 1;) {}
 }
