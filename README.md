@@ -1,5 +1,14 @@
 # Learning OS
 
+Compile and run the kernel via QEMU: 
+```shell
+$ cd src
+$ make run
+```
+
+Prerequisites are the `arm-none-eabi` toolchain and QEMU with the patch
+for the Portux 920T.
+
 ## macOS toolchain install
 
 ```shell
