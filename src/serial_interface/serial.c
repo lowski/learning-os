@@ -75,6 +75,7 @@ void transmit_byte(unsigned char byte) {
 }
 
 unsigned int receive_byte() {
+    // receiver overrun is being ignored.
     while (dbgu->sr_rxrdy != 1);
 
     return dbgu->rhr;
@@ -126,26 +127,21 @@ void printf(const char* fmt, ...) {
         if (escape) {
             // no handling if the type is wrong.
             if (c == 'c') {
-                    transmit_byte(va_arg(args, unsigned int));
+                transmit_byte(va_arg(args, unsigned int));
             } else if (c == 's') {
-                    transmit_string(va_arg(args, const char*));
-            } else if (c == 'x') {
-                    unsigned int arg = va_arg(args, unsigned int);
-                    int converted_length = ilen(arg, 16);
-                    char converted[converted_length + 1];
-                    itoa(arg, converted, 16);
-                    converted[converted_length] = '\0';
-                    transmit_string(converted);
-            } else if (c == 'p') {
-                    void *arg = va_arg(args, void *);
-                    int converted_length = ilen((unsigned int) arg, 16);
-                    char converted[converted_length + 1];
-                    itoa((unsigned int) arg, converted, 16);
-                    converted[converted_length] = '\0';
-                    transmit_string(converted);
+                transmit_string(va_arg(args, const char*));
+            } else if (c == 'x' || c == 'p') {
+                unsigned int arg = va_arg(args, unsigned int);
+                int converted_length = ilen(arg, 16);
+                char converted[converted_length + 3];
+                itoa(arg, converted + 2, 16);
+                converted[0] = '0';
+                converted[1] = 'x';
+                converted[converted_length + 2] = '\0';
+                transmit_string(converted);
             } else {
-                    transmit_byte('%');
-                    transmit_byte(c);
+                transmit_byte('%');
+                transmit_byte(c);
             }
 
             escape = 0;
