@@ -14,6 +14,4 @@ int main() {
         rcv = (char) receive_byte();
         printf("You have typed: %c\r\n", rcv);
     }
-
-    return 0;
 }

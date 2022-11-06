@@ -6,4 +6,3 @@ void _start(void)
         main();
         for(;;);
 }
-

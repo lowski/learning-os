@@ -69,8 +69,7 @@ void enable_dbgu(void) {
 }
 
 void transmit_byte(unsigned char byte) {
-    // wait for txrdy to be high as a kite
-    for (; dbgu->sr_txrdy != 1;) {}
+    while (dbgu->sr_txrdy != 1);
 
     dbgu->thr = byte;
 }
@@ -86,7 +85,7 @@ void transmit_string(const char* str) {
     for (int i = 0; i < len; ++i) {
         transmit_byte(str[i]);
     }
-    for (; dbgu->sr_txempty != 1;) {}
+    while (dbgu->sr_txempty != 1);
 }
 
 const char alphabet[62] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -98,8 +97,7 @@ static int ilen(int value, int base) {
     while (val > 0) {
         rest = val % base;
         ++i;
-        val -= rest;
-        val = val / base;
+        val = (val - rest) / base;
     }
     return i;
 }
@@ -164,5 +162,5 @@ void printf(const char* fmt, ...) {
 
     va_end(args);
 
-    for (; dbgu->sr_txempty != 1;) {}
+    while (dbgu->sr_txempty != 1);
 }
