@@ -1,17 +1,15 @@
 #include "serial_interface/serial.h"
+#include "interrupts/interrupts.h"
+#include "memory/memory.h"
 
 // main entry point
 int main() {
     enable_dbgu();
-    int i = 128;
-    printf("test %c \r\n", 0x41);
-    printf("test %s\r\n", "hi");
-    printf("test %x\r\n", i);
-    printf("test %p\r\n", &i);
+    init_memory();
+    printf("Booted.\r\n");
 
-    char rcv;
-    while(1) {
-        rcv = (char) receive_byte();
-        printf("You have typed: %c\r\n", rcv);
-    }
+    cause_data_abort();
+
+    printf("Done.\r\n");
+    return 0;
 }

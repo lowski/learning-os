@@ -3,14 +3,14 @@
 # ============
 
 LSCRIPT = kernel.lds
-OBJ = start.o main.o serial_interface/serial.o stdlib/str.o
+OBJ = start.o main.o serial_interface/serial.o stdlib/str.o interrupts/interrupts.o memory/memory.o
 DEP = $(OBJ:.o=.d)
 
 # ======================
 # COMPILER CONFIGURATION
 # ======================
 
-CFLAGS = -Wall -Wextra -ffreestanding -mcpu=arm920t -O2 -std=c11
+CFLAGS = -Wall -Wextra -ffreestanding -mcpu=arm920t -O2 -std=c11 -g -fasm
 
 CC = arm-none-eabi-gcc
 LD = arm-none-eabi-ld
