@@ -7,17 +7,18 @@
 #define MEMORY_CONTROLLER 0xFFFFFF00
 static volatile unsigned int * const memory_controller = (unsigned int *)MEMORY_CONTROLLER;
 
-#define SP_START 0x8FFFFFFF
+#define SP_START 0x002FFFFF
 #define SP_SIZE 512
 
 #define MODE_MASK 0xFFFFFFE0
-#define MODE_USR 0b10000
-#define MODE_FIQ 0b10001
-#define MODE_IRQ 0b10010
-#define MODE_SVC 0b10011
-#define MODE_ABT 0b10111
-#define MODE_UND 0b11011
-#define MODE_SYS 0b11111
+
+#define MODE_USR 0b10000 // user
+#define MODE_FIQ 0b10001 // fast interrupt
+#define MODE_IRQ 0b10010 // interrupt
+#define MODE_SVC 0b10011 // supervisor
+#define MODE_ABT 0b10111 // data abort
+#define MODE_UND 0b11011 // undefined instruction
+#define MODE_SYS 0b11111 // system
 
 void switch_mode(unsigned int mode) {
     register int cpsr;
