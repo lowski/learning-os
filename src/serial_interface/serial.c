@@ -139,6 +139,15 @@ void printf(const char* fmt, ...) {
                 converted[1] = 'x';
                 converted[converted_length + 2] = '\0';
                 transmit_string(converted);
+            } else if (c == 'b') {
+                unsigned int arg = va_arg(args, unsigned int);
+                int converted_length = ilen(arg, 2);
+                char converted[converted_length + 3];
+                itoa(arg, converted + 2, 2);
+                converted[0] = '0';
+                converted[1] = 'b';
+                converted[converted_length + 2] = '\0';
+                transmit_string(converted);
             } else {
                 transmit_byte('%');
                 transmit_byte(c);
