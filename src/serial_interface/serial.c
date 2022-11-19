@@ -104,6 +104,10 @@ static int ilen(int value, int base) {
 }
 
 static char* itoa(int value, char* str, int base) {
+    if (value == 0) {
+        str[0] = '0';
+        return str;
+    }
     int i = 0;
     int val = value;
     while (val > 0) {
