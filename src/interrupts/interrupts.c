@@ -12,19 +12,32 @@ void cause_data_abort() {
     *invalid_memory = 1;
 }
 
-__attribute__((naked, section(".ivt")))
-void ivt() {
-    asm ("nop");
-    asm ("b abt_handler");
-    asm ("b abt_handler");
-    asm ("b abt_handler");
-    asm ("b abt_handler");
-    asm ("nop");
-    asm ("b abt_handler");
-    asm ("b abt_handler");
+__attribute__((section(".handlers")))
+void handler_fiq() {
+    printf("There was a fiq interrupt!\r\n");
 }
 
-__attribute__((naked, section(".handlers")))
-void abt_handler() {
-    printf("Fuck, there was an interrupt :/\r\n");
+__attribute__((section(".handlers")))
+void handler_irq() {
+    printf("There was an irq interrupt!\r\n");
+}
+
+__attribute__((section(".handlers")))
+void handler_pfabt() {
+    printf("There was a prefetch abt interrupt!\r\n");
+}
+
+__attribute__((section(".handlers")))
+void handler_dabt() {
+    printf("There was a data abt interrupt!\r\n");
+}
+
+__attribute__((section(".handlers")))
+void handler_und() {
+    printf("There was an und interrupt!\r\n");
+}
+
+__attribute__((section(".handlers")))
+void handler_swi() {
+    printf("There was a swi interrupt!\r\n");
 }

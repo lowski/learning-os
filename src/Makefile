@@ -3,7 +3,7 @@
 # ============
 
 LSCRIPT = kernel.lds
-OBJ = start.o main.o serial_interface/serial.o stdlib/str.o interrupts/interrupts.o memory/memory.o
+OBJ = start.o main.o serial_interface/serial.o stdlib/str.o interrupts/interrupts.o memory/memory.o interrupts/ivt.o
 DEP = $(OBJ:.o=.d)
 
 # ======================

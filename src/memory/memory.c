@@ -20,10 +20,15 @@ static volatile unsigned int * const memory_controller = (unsigned int *)MEMORY_
 #define MODE_UND 0b11011 // undefined instruction
 #define MODE_SYS 0b11111 // system
 
-void switch_mode(unsigned int mode) {
+
+unsigned int get_current_mode() {
     register int cpsr;
     asm("MRS %0, CPSR" : "=r" (cpsr));
-    cpsr &= MODE_MASK;
+    return cpsr & (~MODE_MASK);
+}
+
+void switch_mode(unsigned int mode) {
+    register unsigned int cpsr = get_current_mode();
     cpsr |= mode;
     asm("MSR CPSR, %0" :: "r" (cpsr));
 }
@@ -49,6 +54,8 @@ void init_memory() {
     write_sp(4);
     switch_mode(MODE_SYS);
     write_sp(5);
+
+    // user mode is ignored for now, as we won't get out anymore :/
 
     // go back to the initial mode
     switch_mode(MODE_SVC);
