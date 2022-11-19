@@ -12,14 +12,6 @@ static volatile unsigned int * const memory_controller = (unsigned int *)MEMORY_
 
 #define MODE_MASK 0xFFFFFFE0
 
-#define MODE_USR 0b10000 // user
-#define MODE_FIQ 0b10001 // fast interrupt
-#define MODE_IRQ 0b10010 // interrupt
-#define MODE_SVC 0b10011 // supervisor
-#define MODE_ABT 0b10111 // data abort
-#define MODE_UND 0b11011 // undefined instruction
-#define MODE_SYS 0b11111 // system
-
 
 unsigned int get_current_mode() {
     register int cpsr;

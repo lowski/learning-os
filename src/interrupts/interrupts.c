@@ -12,32 +12,66 @@ void cause_data_abort() {
     *invalid_memory = 1;
 }
 
+__attribute__((naked, section(".handlers")))
+void die() {
+    asm("b die");
+}
+
 __attribute__((section(".handlers")))
-void handler_fiq() {
+void chandler_rst() {
+    printf("There was an rst interrupt!\r\n");
+}
+
+__attribute__((section(".handlers")))
+void *chandler_fiq(void *lr) {
     printf("There was a fiq interrupt!\r\n");
+
+    // run both instructions that were already in the pipeline again
+    return lr - 8;
 }
 
 __attribute__((section(".handlers")))
-void handler_irq() {
+void *chandler_irq(void *lr) {
     printf("There was an irq interrupt!\r\n");
+
+    // run both instructions that were already in the pipeline again
+    return lr - 8;
 }
 
 __attribute__((section(".handlers")))
-void handler_pfabt() {
+void *chandler_pfabt(void *lr) {
     printf("There was a prefetch abt interrupt!\r\n");
+    printf("Location: %p\n", lr - 4);
+
+    // skip the instruction that created the interrupt (which is one behind).
+    return lr;
 }
 
 __attribute__((section(".handlers")))
-void handler_dabt() {
+void *chandler_dabt(void *lr) {
     printf("There was a data abt interrupt!\r\n");
+    printf("Location: %p\n", lr - 8);
+
+    // skip the instruction that created the interrupt (which is 2 behind)
+    return lr - 4;
 }
 
 __attribute__((section(".handlers")))
-void handler_und() {
-    printf("There was an und interrupt!\r\n");
+void chandler_und(void *lr) {
+    // a missing instruction means kill everything.
+
+    asm("PUSH {lr}");
+    printf("There was an undefined instruction!\r\n");
+    printf("Location: %p\n", lr - 8);
+    printf("Execution halted.\r\n");
+    die();
 }
 
 __attribute__((section(".handlers")))
-void handler_swi() {
+void *chandler_swi(void *lr) {
     printf("There was a swi interrupt!\r\n");
+    printf("Location: %p\n", lr - 8);
+
+    // return to the next instruction after the one that created the interrupt.
+    return lr - 4;
 }

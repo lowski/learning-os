@@ -7,9 +7,15 @@ int main() {
     enable_dbgu();
     init_memory();
     printf("Booted.\r\n");
+    printf("Current mode: %b\r\n", get_current_mode());
 
     cause_data_abort();
 
+    printf("Current mode: %b\r\n", get_current_mode());
     printf("Done.\r\n");
-    return 0;
+
+    for (;;);
+
+    // we cannot return from this function, as the .init section is now shadowed by the ivt, so if we try to return
+    // to the _start() function, we will land in an interrupt handler.
 }

@@ -4,5 +4,4 @@ __attribute__((naked, section(".init")))
 void _start(void)
 {
         main();
-        for(;;);
 }
