@@ -3,7 +3,11 @@
 # ============
 
 LSCRIPT = kernel.lds
-OBJ = start.o main.o serial_interface/serial.o stdlib/str.o interrupts/interrupts.o memory/memory.o interrupts/ivt.o
+DIRS = interrupts memory serial_interface stdlib
+
+SRC_C = $(wildcard *.c $(foreach fd, $(DIRS), $(fd)/*.c))
+SRC_S = $(wildcard *.S $(foreach fd, $(DIRS), $(fd)/*.S))
+OBJ = $(SRC_C:.c=.o) $(SRC_S:.S=.o)
 DEP = $(OBJ:.o=.d)
 
 # ======================
