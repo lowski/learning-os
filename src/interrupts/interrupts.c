@@ -1,9 +1,5 @@
-//
-// Created by Leonard von Lojewski on 15.11.22.
-//
-
 #include "interrupts.h"
-#include "../serial_interface/serial.h"
+#include "../stdlib/stdio.h"
 
 #define INVALID_MEMORY 0x9000000
 static volatile char* invalid_memory = (char*)INVALID_MEMORY;

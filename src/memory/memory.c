@@ -1,7 +1,3 @@
-//
-// Created by Leonard von Lojewski on 15.11.22.
-//
-
 #include "memory.h"
 
 #define MEMORY_CONTROLLER 0xFFFFFF00
@@ -9,24 +5,14 @@ static volatile unsigned int * const memory_controller = (unsigned int *)MEMORY_
 
 #define SP_START 0x002FFFFF
 #define SP_SIZE 512
+#define write_sp(index) asm("MOV %%sp, %0" :: "r" (SP_START - index * SP_SIZE));
 
 #define MODE_MASK 0xFFFFFFE0
-
 
 unsigned int get_current_mode() {
     register int cpsr;
     asm("MRS %0, CPSR" : "=r" (cpsr));
     return cpsr & (~MODE_MASK);
-}
-
-void switch_mode(unsigned int mode) {
-    register unsigned int cpsr = get_current_mode();
-    cpsr |= mode;
-    asm("MSR CPSR_c, %0" :: "r" (mode));
-}
-
-static inline void write_sp(unsigned int index) {
-    asm("MOV %%sp, %0" :: "r" (SP_START - index * SP_SIZE));
 }
 
 void init_memory() {

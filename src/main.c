@@ -1,6 +1,6 @@
-#include "serial_interface/serial.h"
 #include "interrupts/interrupts.h"
 #include "memory/memory.h"
+#include "stdlib/stdio.h"
 #include "stdlib/str.h"
 
 void handle_command(const char* cmd) {
@@ -31,7 +31,8 @@ int main() {
     init_memory();
     printf("\033[2J\033[H");
     printf("System initialized - switching to USR mode...\n");
-    asm("MSR CPSR_c, %0" :: "r" (MODE_USR));
+    printf("If you don't know what to do, try \"help\".\n\n");
+    switch_mode(MODE_USR)
 
     char buf[128];
     int ibuf = 0;

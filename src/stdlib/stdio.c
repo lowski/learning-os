@@ -1,5 +1,5 @@
-#include "serial.h"
-#include "../stdlib/str.h"
+#include "stdio.h"
+#include "str.h"
 #include "stdarg.h"
 
 #define DBGU 0xFFFFF200 // Figure 8-1
