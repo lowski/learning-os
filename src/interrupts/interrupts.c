@@ -70,7 +70,7 @@ void chandler_und(void *lr) {
 
     printf("There was an undefined instruction!\r\n");
     printf("Location: %p\n", lr - 8);
-    printf("Execution halted.\r\n");
+    printf("Cannot recover - execution halted.\r\n");
     die();
 }
 
