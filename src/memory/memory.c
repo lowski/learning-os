@@ -22,7 +22,7 @@ unsigned int get_current_mode() {
 void switch_mode(unsigned int mode) {
     register unsigned int cpsr = get_current_mode();
     cpsr |= mode;
-    asm("MSR CPSR, %0" :: "r" (cpsr));
+    asm("MSR CPSR_c, %0" :: "r" (mode));
 }
 
 static inline void write_sp(unsigned int index) {
@@ -49,6 +49,7 @@ void init_memory() {
 
     // user mode is ignored for now, as we won't get out anymore :/
 
-    // go back to the initial mode
+    // Go to user mode and initialize stack pointer
     switch_mode(MODE_SVC);
+//    switch_mode(MODE_USR);
 }

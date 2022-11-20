@@ -6,12 +6,18 @@
 int main() {
     enable_dbgu();
     init_memory();
-    printf("Booted.\r\n");
-    printf("Current mode: %b\r\n", get_current_mode());
+    printf("\033[2J\033[H");
+    printf("System initialized - switching to USR mode...\n");
+    asm("MSR CPSR_c, %0" :: "r" (MODE_USR));
 
+    printf("Current mode: %b\r\n", get_current_mode());
     cause_data_abort();
-
     printf("Current mode: %b\r\n", get_current_mode());
+    cause_software_interrupt();
+    printf("Current mode: %b\r\n", get_current_mode());
+    cause_undefined_instruction();
+    printf("Current mode: %b\r\n", get_current_mode());
+
     printf("Done.\r\n");
 
     for (;;);

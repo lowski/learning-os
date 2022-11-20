@@ -12,6 +12,14 @@ void cause_data_abort() {
     *invalid_memory = 1;
 }
 
+void cause_software_interrupt() {
+    asm("SWI 0");
+}
+
+void cause_undefined_instruction() {
+    asm("LDMFD sp!,{pc}^");
+}
+
 __attribute__((naked, section(".handlers")))
 void die() {
     asm("b die");
@@ -60,7 +68,6 @@ __attribute__((section(".handlers")))
 void chandler_und(void *lr) {
     // a missing instruction means kill everything.
 
-    asm("PUSH {lr}");
     printf("There was an undefined instruction!\r\n");
     printf("Location: %p\n", lr - 8);
     printf("Execution halted.\r\n");
@@ -69,9 +76,10 @@ void chandler_und(void *lr) {
 
 __attribute__((section(".handlers")))
 void *chandler_swi(void *lr) {
+    // NOTE: If the SWI is caused from the SVC mode, the original LR is lost, and we will crash.
     printf("There was a swi interrupt!\r\n");
-    printf("Location: %p\n", lr - 8);
+    printf("Location: %p\n", lr - 4);
 
     // return to the next instruction after the one that created the interrupt.
-    return lr - 4;
+    return lr;
 }
