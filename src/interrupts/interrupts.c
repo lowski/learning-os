@@ -65,7 +65,7 @@ void chandler_und(void *lr) {
     // a missing instruction means kill everything.
 
     printf("There was an undefined instruction!\r\n");
-    printf("Location: %p\n", lr - 8);
+    printf("Location: %p\n", lr - 4);
     printf("Cannot recover - execution halted.\r\n");
     die();
 }
