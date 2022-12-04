@@ -1,3 +1,4 @@
+#include "drivers/dbgu.h"
 #include "interrupts/interrupts.h"
 #include "memory/memory.h"
 #include "stdlib/stdio.h"
@@ -27,7 +28,7 @@ void handle_command(const char* cmd) {
 
 // main entry point
 int main() {
-    enable_dbgu();
+    dbgu_init();
     init_memory();
     printf("\033[2J\033[H");
     printf("System initialized - switching to USR mode...\n");

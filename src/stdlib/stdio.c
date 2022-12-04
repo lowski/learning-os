@@ -1,30 +1,14 @@
-#include "stdio.h"
-#include "str.h"
 #include "stdarg.h"
 
-// enable DBGU transmitter (26.4.3)
-void enable_dbgu(void) {
-    dbgu->control = (1 << 6) | (1 << 4); // for offset see dbgu_mm_cr
-    dbgu->interrupt_enable = dbgu->interrupt_mask | MASK_DBGU_IRQ_RXRDY;
-}
+#include "../drivers/dbgu.h"
+#include "stdio.h"
+#include "str.h"
 
-void transmit_byte(unsigned char byte) {
-    while (dbgu->status.txrdy != 1);
-
-    dbgu->transmit_holding = byte;
-}
-
-unsigned int receive_byte() {
-    // receiver overrun is being ignored.
-    while (dbgu->status.rxrdy != 1);
-
-    return dbgu->receive_holding;
-}
 
 void transmit_string(const char* str) {
     int len = strlen(str);
     for (int i = 0; i < len; ++i) {
-        transmit_byte(str[i]);
+        dbgu_transmit(str[i]);
     }
     while (dbgu->status.txempty != 1);
 }
@@ -74,7 +58,7 @@ void printf(const char* fmt, ...) {
         if (escape) {
             // no handling if the type is wrong.
             if (c == 'c') {
-                transmit_byte(va_arg(args, unsigned int));
+                dbgu_transmit(va_arg(args, unsigned int));
             } else if (c == 's') {
                 transmit_string(va_arg(args, const char*));
             } else if (c == 'x' || c == 'p') {
@@ -96,8 +80,8 @@ void printf(const char* fmt, ...) {
                 converted[converted_length + 2] = '\0';
                 transmit_string(converted);
             } else {
-                transmit_byte('%');
-                transmit_byte(c);
+                dbgu_transmit('%');
+                dbgu_transmit(c);
             }
 
             escape = 0;
@@ -109,7 +93,7 @@ void printf(const char* fmt, ...) {
             continue;
         }
 
-        transmit_byte(c);
+        dbgu_transmit(c);
     }
 
     va_end(args);

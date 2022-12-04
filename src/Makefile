@@ -3,7 +3,7 @@
 # ============
 
 LSCRIPT = kernel.lds
-DIRS = interrupts memory serial_interface stdlib
+DIRS = interrupts memory serial_interface stdlib drivers
 
 SRC_C = $(wildcard *.c $(foreach fd, $(DIRS), $(fd)/*.c))
 SRC_S = $(wildcard *.S $(foreach fd, $(DIRS), $(fd)/*.S))
