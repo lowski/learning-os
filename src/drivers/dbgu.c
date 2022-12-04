@@ -17,7 +17,7 @@ void dbgu_transmit(unsigned char byte) {
 
 unsigned char dbgu_receive() {
     // receiver overrun is being ignored.
-    while (receive_buffer == 0) asm("NOP");
+    while (receive_buffer == 0) asm("" ::: "memory");
 
     unsigned char res = receive_buffer;
     receive_buffer = 0;
