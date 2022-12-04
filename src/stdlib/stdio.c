@@ -91,7 +91,7 @@ void transmit_string(const char* str) {
 
 const char alphabet[62] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-static int ilen(int value, int base) {
+inline int ilen(int value, int base) {
     if (value == 0) {
         return 1;
     }
@@ -106,7 +106,7 @@ static int ilen(int value, int base) {
     return i;
 }
 
-static char* itoa(int value, char* str, int base) {
+inline char* itoa(int value, char* str, int base) {
     if (value == 0) {
         str[0] = '0';
         return str;
