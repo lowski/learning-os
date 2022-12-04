@@ -1,4 +1,6 @@
+#include "drivers/aic.h"
 #include "drivers/dbgu.h"
+#include "drivers/system_timer.h"
 #include "interrupts/interrupts.h"
 #include "memory/memory.h"
 #include "stdlib/stdio.h"
@@ -30,6 +32,8 @@ void handle_command(const char* cmd) {
 int main() {
     dbgu_init();
     init_memory();
+    aic_init();
+    system_timer_init();
     printf("\033[2J\033[H");
     printf("System initialized - switching to USR mode...\n");
     printf("If you don't know what to do, try \"help\".\n\n");

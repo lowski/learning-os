@@ -1,5 +1,4 @@
 #include "dbgu.h"
-#include "memory_map.h"
 
 void dbgu_init(void) {
     // enable receive and transmit
