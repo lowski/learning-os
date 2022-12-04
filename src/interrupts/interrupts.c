@@ -1,8 +1,13 @@
 #include "interrupts.h"
+#include "../drivers/aic.h"
+#include "../drivers/dbgu.h"
+#include "../drivers/system_timer.h"
 #include "../stdlib/stdio.h"
 
 #define INVALID_MEMORY 0x9000000
 static volatile char* invalid_memory = (char*)INVALID_MEMORY;
+
+unsigned int interrupt_demo_mode = 0;
 
 void cause_data_abort() {
     *invalid_memory = 1;
@@ -36,7 +41,29 @@ void *chandler_fiq(void *lr) {
 
 __attribute__((section(".handlers")))
 void *chandler_irq(void *lr) {
-    printf("There was an irq interrupt!\r\n");
+    unsigned int ivr = aic->interrupt_vector;
+    unsigned int handled = 0;
+
+    if (aic->interrupt_status == 1) {
+        // this means the interrupt originated with the AIC.
+        // source 1 is the internal periphery.
+
+        if (system_timer->status.period_interval_timer) {
+            if (interrupt_demo_mode) {
+                printf("!\r\n");
+            }
+            handled = 1;
+        } else if (dbgu->status.rxrdy) {
+            dbgu_handle_irq();
+            handled = 1;
+        }
+    }
+
+    if (!handled) {
+        printf("There was an unknown irq interrupt!\r\n");
+    }
+
+    aic->end_of_interrupt_command = 1;
 
     // run both instructions that were already in the pipeline again
     return lr - 8;

@@ -62,5 +62,6 @@ static volatile struct dbgu *const dbgu = (struct dbgu *) DBGU_ADDR;
 void dbgu_init();
 void dbgu_transmit(unsigned char);
 unsigned char dbgu_receive();
+void dbgu_handle_irq();
 
 #endif //LEARNING_OS_DBGU_H
