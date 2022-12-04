@@ -4,5 +4,6 @@
 void cause_data_abort();
 void cause_software_interrupt();
 void cause_undefined_instruction();
+void demo_interrupts();
 
 #endif //LEARNING_OS_INTERRUPTS_H

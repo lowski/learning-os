@@ -15,8 +15,11 @@ void handle_command(const char* cmd) {
         cause_data_abort();
     } else if (strcmp(cmd, "except und") == 0) {
         cause_undefined_instruction();
+    } else if (strcmp(cmd, "demo interrupts") == 0) {
+        demo_interrupts();
     } else if (strcmp(cmd, "help") == 0) {
         printf("Commands:\n"
+               "  demo interrupts\n"
                "  except <swi|dabt|und>\n"
                "  help\n"
                "  ping\n"
@@ -46,7 +49,7 @@ int main() {
         if (ibuf == 0){
             printf("\r$ ");
         }
-        char rx = receive_byte();
+        char rx = dbgu_receive();
 
         if (escape_seq_remaining > 0) {
             escape_seq_remaining--;
