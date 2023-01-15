@@ -33,3 +33,10 @@ int strcmp(const char *str1, const char *str2) {
     }
     return 0;
 }
+
+void *memcpy(void *dest, void *src, int count) {
+    for (int i = 0; i < count; ++i) {
+        ((char *)dest)[i] = ((char *)src)[i];
+    }
+    return dest;
+}
