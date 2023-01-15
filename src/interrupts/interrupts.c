@@ -82,7 +82,6 @@ void *chandler_fiq(void *lr) {
     return lr - 8;
 }
 
-__attribute__((section(".handlers")))
 void *chandler_irq(void *lr, unsigned int registers[15]) {
     unsigned int ivr = aic->interrupt_vector;
     unsigned int handled = 0;
@@ -124,6 +123,11 @@ void *chandler_irq(void *lr, unsigned int registers[15]) {
     // run both instructions that were already in the pipeline again
     memcpy(registers, new_registers, 15*4);
     return next_pc;
+}
+
+__attribute__((section(".handlers")))
+void *__chandler_irq_veneer(void *lr, unsigned int registers[15]) {
+    return chandler_irq(lr, registers);
 }
 
 __attribute__((section(".handlers")))

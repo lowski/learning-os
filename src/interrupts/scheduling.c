@@ -41,9 +41,9 @@ unsigned int fork(void *pc) {
         return 0;
     }
     t->id = thread_id++;
-    t->sp = t->sp_default;
     t->status = ready;
     t->pc = pc;
+    t->registers[13] = (unsigned int)t->sp_default;
 
     return t->id;
 }

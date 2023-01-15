@@ -11,7 +11,6 @@ enum tcb_status {
 
 struct tcb {
     unsigned int id;
-    void *sp;
     void *sp_default;
     unsigned int cpsr;
     enum tcb_status status;

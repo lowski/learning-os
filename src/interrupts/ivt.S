@@ -53,11 +53,11 @@ handler_irq:
     SUB sp, #(13*4)
     mov r0, lr
     mov r1, sp
-    bl chandler_irq
+    bl __chandler_irq_veneer
     str r0, [sp, #15*4]
-    LDMFD sp!,{r0-r12}
-    LDMFD sp, {r13,r14}^
-    ADD sp, #8
+    LDMIA sp, {r0-r14}^
+    ADD sp, #(14*4)
+    POP {lr} // what the f*** is this?! we need to write to the LR of the interrupt mode and not of the user mode????
     LDMFD sp!,{pc}^
 
 handler_fiq:
