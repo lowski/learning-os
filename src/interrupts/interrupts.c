@@ -4,6 +4,7 @@
 #include "../drivers/swi.h"
 #include "../drivers/system_timer.h"
 #include "../stdlib/stdio.h"
+#include "../stdlib/str.h"
 #include "scheduling.h"
 
 #define INVALID_MEMORY 0x9000000
@@ -106,7 +107,7 @@ void *chandler_irq(void *lr, unsigned int registers[15]) {
         printf("There was an unknown irq interrupt!\r\n");
     }
 
-    unsigned int *new_registers = registers;
+    unsigned int *new_registers = 0;
     void *next_pc = lr - 8;
     if (scheduler_ready <= 0) {
         scheduler_ready = scheduler_max_interval;
@@ -121,7 +122,10 @@ void *chandler_irq(void *lr, unsigned int registers[15]) {
     aic->end_of_interrupt_command = 1;
 
     // run both instructions that were already in the pipeline again
-    memcpy(registers, new_registers, 15*4);
+
+    if (new_registers != 0) {
+        memcpy(registers, new_registers, 15*4);
+    }
     return next_pc;
 }
 

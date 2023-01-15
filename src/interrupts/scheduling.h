@@ -9,6 +9,13 @@ enum tcb_status {
     ready,
 };
 
+enum tcb_priority {
+    idle,
+    low,
+    medium,
+    high,
+};
+
 struct tcb {
     unsigned int id;
     void *sp_default;
@@ -17,6 +24,9 @@ struct tcb {
     // r0-r12, sp (r13), lr (r12)
     unsigned int registers[15];
     void *pc;
+
+    // 0 - idle thread, 1 - low, 2 - medium, 3 - high
+    enum tcb_priority priority;
 };
 
 unsigned int fork(void *pc);

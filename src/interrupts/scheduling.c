@@ -1,4 +1,5 @@
 #include "scheduling.h"
+#include "../drivers/swi.h"
 #include "../stdlib/str.h"
 #include "../stdlib/stdio.h"
 
@@ -26,8 +27,24 @@ struct tcb *find_free_tcb() {
     return 0;
 }
 
-void thread_nop() {
-    for (;;) asm("NOP");
+struct tcb *find_tcb_by_id(unsigned int id) {
+    for (int i = 0; i < MAX_THREAD_COUNT; ++i) {
+        if (TCBS[i].id == id) {
+            return &TCBS[i];
+        }
+    }
+    return 0;
+}
+
+// Kill the currently running thread.
+void kill_current_thread(void) {
+    raise_swi(SWI_CODE_DISABLE_IRQ);
+
+    current_thread->status = not_existing;
+
+    raise_swi(SWI_CODE_ENABLE_IRQ);
+
+    for (;;);
 }
 
 unsigned int fork(void *pc) {
@@ -43,18 +60,20 @@ unsigned int fork(void *pc) {
     t->id = thread_id++;
     t->status = ready;
     t->pc = pc;
+    t->priority = medium;
     t->registers[13] = (unsigned int)t->sp_default;
+    t->registers[14] = (unsigned int)kill_current_thread;
 
     return t->id;
 }
 
 void kill(unsigned int id) {
-    for (int i = 0; i < MAX_THREAD_COUNT; ++i) {
-        if (TCBS[i].id == id) {
-            TCBS[i].status = not_existing;
-            break;
-        }
-    }
+    struct tcb *t = find_tcb_by_id(id);
+    if (t == 0) return;
+
+    // We ignore if the thread is currently running. It will not be stopped immediately, but will not be scheduled
+    // again.
+    t->status = not_existing;
 }
 
 struct tcb *scheduler(void *pc, unsigned int registers[15]) {
@@ -67,12 +86,16 @@ struct tcb *scheduler(void *pc, unsigned int registers[15]) {
     }
 
     // select next thread
+    // round-robin, but higher priority (smaller number) always takes precedence
     struct tcb *next_tcb = 0;
-    for (int i = 0; i <= MAX_THREAD_COUNT; i++) {
-        current_thread_idx = (current_thread_idx + 1) % MAX_THREAD_COUNT;
-        if (TCBS[current_thread_idx].status == ready) {
-            next_tcb = &TCBS[current_thread_idx];
-            break;
+    unsigned int next_thread_idx = 0;
+    for (int i = 0; i < MAX_THREAD_COUNT; i++) {
+        int idx = (current_thread_idx + i + 1) % MAX_THREAD_COUNT;
+
+        struct tcb *t = &TCBS[idx];
+        if (t->status == ready && (next_tcb == 0 || t->priority > next_tcb->priority)) {
+            next_tcb = t;
+            next_thread_idx = idx;
         }
     }
 
@@ -81,6 +104,7 @@ struct tcb *scheduler(void *pc, unsigned int registers[15]) {
     }
 
     current_thread = next_tcb;
+    current_thread_idx = next_thread_idx;
 
     return current_thread;
 }
@@ -92,17 +116,18 @@ void scheduler_init(void) {
     current_thread = &TCBS[0];
 
     // create idle thread
-//    fork(thread_nop);
+    unsigned int idle_thread_id = fork(thread_nop);
+    find_tcb_by_id(idle_thread_id)->priority = idle;
 }
 
 void print_tcb(struct tcb *t) {
     printf("tcb{\n"
            "  id = %d,\n"
-           "  sp = %x,\n"
            "  sp_default = %x,\n"
            "  status = %d,\n"
            "  pc = %x,\n"
-           "  registers = [\n", t->id, t->sp, t->sp_default, t->status, t->pc);
+           "  priority = %d,\n"
+           "  registers = [\n", t->id, t->sp_default, t->status, t->pc, t->priority);
     for (int i = 0; i < 15; ++i) {
         printf("    %x,\n", t->registers[i]);
     }
