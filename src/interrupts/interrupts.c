@@ -3,11 +3,14 @@
 #include "../drivers/dbgu.h"
 #include "../drivers/system_timer.h"
 #include "../stdlib/stdio.h"
+#include "scheduling.h"
 
 #define INVALID_MEMORY 0x9000000
 static volatile char* invalid_memory = (char*)INVALID_MEMORY;
 
 unsigned int interrupt_demo_mode = 0;
+const unsigned int scheduler_max_interval = SCHEDULER_INTERVAL_MS / SYSTEM_TIMER_PIT_INTERVAL_MS;
+unsigned int scheduler_ready = scheduler_max_interval;
 
 void cause_data_abort() {
     *invalid_memory = 1;
@@ -35,6 +38,31 @@ void demo_interrupts() {
     }
 }
 
+void thread_a() {
+    for (;;) {
+        printf("Thread A\n");
+        for (int j = 0; j < 50000000; ++j) asm("NOP");
+    }
+}
+
+void thread_b() {
+    for (;;) {
+        printf("Thread B\n");
+        for (int j = 0; j < 50000000; ++j) asm("NOP");
+    }
+}
+
+void demo_fork() {
+    fork(thread_a);
+    fork(thread_b);
+
+    // NOPs are necessary to avoid jumping into previous instruction after interrupt
+    asm("NOP" ::: "memory");
+    asm("NOP" ::: "memory");
+    for (;;);
+}
+
+
 __attribute__((naked, section(".handlers")))
 void die() {
     asm("b die");
@@ -54,9 +82,10 @@ void *chandler_fiq(void *lr) {
 }
 
 __attribute__((section(".handlers")))
-void *chandler_irq(void *lr) {
+void *chandler_irq(void *lr, unsigned int registers[15]) {
     unsigned int ivr = aic->interrupt_vector;
     unsigned int handled = 0;
+    scheduler_ready--;
 
     if (aic->interrupt_status == 1) {
         // this means the interrupt originated with the AIC.
@@ -77,10 +106,23 @@ void *chandler_irq(void *lr) {
         printf("There was an unknown irq interrupt!\r\n");
     }
 
+    unsigned int *new_registers = registers;
+    void *next_pc = lr - 8;
+    if (scheduler_ready <= 0) {
+        scheduler_ready = scheduler_max_interval;
+        struct tcb *next_tcb = scheduler(next_pc, registers);
+        if (next_tcb != 0) {
+            new_registers = next_tcb->registers;
+            next_pc = next_tcb->pc;
+            asm("MSR SPSR, %0" :: "r" (next_tcb->cpsr));
+        }
+    }
+
     aic->end_of_interrupt_command = 1;
 
     // run both instructions that were already in the pipeline again
-    return lr - 8;
+    registers = new_registers;
+    return next_pc;
 }
 
 __attribute__((section(".handlers")))

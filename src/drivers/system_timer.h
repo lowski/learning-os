@@ -27,6 +27,8 @@ struct system_timer {
 #define SYSTEM_TIMER_MASK_RTT 0b100
 #define SYSTEM_TIMER_MASK_ALARM 0b1000
 
+#define SYSTEM_TIMER_PIT_INTERVAL_MS 100
+
 #define SYSTEM_TIMER_ADDR 0xFFFFFD00
 static volatile struct system_timer *const system_timer = (struct system_timer *)SYSTEM_TIMER_ADDR;
 

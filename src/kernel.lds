@@ -8,7 +8,10 @@ SECTIONS
 	. = 0x00200100;
     .handlers : { *(.handlers) }
 
-    /* stacks for special modes get 0x002fffff downwards */
+    /* thread control blocks get 0x2F0000 upwards */
+    /* stacks for threads get 0x002FD400 to 0x2ff3ff */
+    /* every thread gets 512B, so 16 threads are supported */
+    /* stacks for special modes get 0x2ff400 to 0x2fffff */
 
 	. = 0x20000000;
 	.init : { *(.init) }

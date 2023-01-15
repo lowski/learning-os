@@ -2,6 +2,7 @@
 #include "drivers/dbgu.h"
 #include "drivers/system_timer.h"
 #include "interrupts/interrupts.h"
+#include "interrupts/scheduling.h"
 #include "memory/memory.h"
 #include "stdlib/stdio.h"
 #include "stdlib/str.h"
@@ -15,11 +16,13 @@ void handle_command(const char* cmd) {
         cause_data_abort();
     } else if (strcmp(cmd, "except und") == 0) {
         cause_undefined_instruction();
+    } else if (strcmp(cmd, "demo fork") == 0) {
+        demo_fork();
     } else if (strcmp(cmd, "demo interrupts") == 0) {
         demo_interrupts();
     } else if (strcmp(cmd, "help") == 0) {
         printf("Commands:\n"
-               "  demo interrupts\n"
+               "  demo <interrupts|fork>\n"
                "  except <swi|dabt|und>\n"
                "  help\n"
                "  ping\n"
@@ -36,6 +39,7 @@ int main() {
     dbgu_init();
     init_memory();
     aic_init();
+    scheduler_init();
     system_timer_init();
     printf("\033[2J\033[H");
     printf("System initialized - switching to USR mode...\n");

@@ -46,11 +46,19 @@ handler_dabt:
     LDMFD sp!,{r0-r12,pc}^
 
 handler_irq:
-    STMFD sp!,{r0-r12,lr}
+    STMFD sp!,{lr}
+    STMFD sp!,{r0-r14}
+    ADD sp, #(13*4)
+    STMIA sp, {r13,r14}^
+    SUB sp, #(13*4)
     mov r0, lr
+    mov r1, sp
     bl chandler_irq
-    str r0, [sp, #13*4]
-    LDMFD sp!,{r0-r12,pc}^
+    str r0, [sp, #15*4]
+    LDMFD sp!,{r0-r12}
+    LDMFD sp, {r13,r14}^
+    ADD sp, #8
+    LDMFD sp!,{pc}^
 
 handler_fiq:
     STMFD sp!,{r0-r12,lr}
