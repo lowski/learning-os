@@ -29,11 +29,13 @@ struct tcb {
     enum tcb_priority priority;
 };
 
-unsigned int fork(void *pc);
-void kill(unsigned int id);
-
 void scheduler_init(void);
 struct tcb *scheduler(void *pc, unsigned int registers[15]);
+
+struct tcb *find_free_tcb();
+struct tcb *find_tcb_by_id(unsigned int id);
+void kill_current_thread();
+unsigned int get_current_thread_id();
 
 void print_tcb(struct tcb* tcb);
 

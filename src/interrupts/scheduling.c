@@ -2,20 +2,34 @@
 #include "../drivers/swi.h"
 #include "../stdlib/str.h"
 #include "../stdlib/stdio.h"
+#include "../stdlib/threading.h"
 
 #define TCB_START 0x2F0000
-#define MAX_THREAD_COUNT 16
 #define THREAD_STACK_SIZE 512
 #define THREAD_STACK_START 0x2FF3FF
 
-unsigned int thread_count = 0;
-unsigned int thread_id = 0;
 unsigned int current_thread_idx = 0;
+
 struct tcb *TCBS = (struct tcb *)TCB_START;
 struct tcb *current_thread;
 
 void thread_nop() {
     for (;;) asm("NOP");
+}
+
+unsigned int get_current_thread_id() {
+    return current_thread->id;
+}
+
+// Kill the currently running thread.
+void kill_current_thread(void) {
+    raise_swi(SWI_CODE_DISABLE_IRQ);
+
+    current_thread->status = not_existing;
+
+    raise_swi(SWI_CODE_ENABLE_IRQ);
+
+    for (;;);
 }
 
 struct tcb *find_free_tcb() {
@@ -34,46 +48,6 @@ struct tcb *find_tcb_by_id(unsigned int id) {
         }
     }
     return 0;
-}
-
-// Kill the currently running thread.
-void kill_current_thread(void) {
-    raise_swi(SWI_CODE_DISABLE_IRQ);
-
-    current_thread->status = not_existing;
-
-    raise_swi(SWI_CODE_ENABLE_IRQ);
-
-    for (;;);
-}
-
-unsigned int fork(void *pc) {
-    if (thread_count >= MAX_THREAD_COUNT) {
-        return 0;
-    }
-    thread_count++;
-
-    struct tcb *t = find_free_tcb();
-    if (t == 0) {
-        return 0;
-    }
-    t->id = thread_id++;
-    t->status = ready;
-    t->pc = pc;
-    t->priority = medium;
-    t->registers[13] = (unsigned int)t->sp_default;
-    t->registers[14] = (unsigned int)kill_current_thread;
-
-    return t->id;
-}
-
-void kill(unsigned int id) {
-    struct tcb *t = find_tcb_by_id(id);
-    if (t == 0) return;
-
-    // We ignore if the thread is currently running. It will not be stopped immediately, but will not be scheduled
-    // again.
-    t->status = not_existing;
 }
 
 struct tcb *scheduler(void *pc, unsigned int registers[15]) {
