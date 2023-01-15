@@ -25,11 +25,19 @@ handler_und:
     LDMFD sp!,{r0-r12,pc}^
 
 handler_swi:
-    STMFD sp!,{r0-r12,lr}
+    STMFD sp!,{lr}
+    STMFD sp!,{r0-r14}
+    ADD sp, #(13*4)
+    STMIA sp, {r13,r14}^
+    SUB sp, #(13*4)
     mov r0, lr
-    bl chandler_swi
-    str r0, [sp, #13*4]
-    LDMFD sp!,{r0-r12,pc}^
+    mov r1, sp
+    bl __chandler_swi_veneer
+    str r0, [sp, #15*4]
+    LDMIA sp, {r0-r14}^
+    ADD sp, #(14*4)
+    POP {lr} // what the f*** is this?! we need to write to the LR of the interrupt mode and not of the user mode????
+    LDMFD sp!,{pc}^
 
 handler_pfabt:
     STMFD sp!,{r0-r12,lr}

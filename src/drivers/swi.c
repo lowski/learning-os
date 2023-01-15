@@ -1,9 +1,6 @@
-//
-// Created by Leonard von Lojewski on 15.01.23.
-//
-
 #include "swi.h"
 #include "../stdlib/stdio.h"
+#include "../drivers/aic.h"
 
 int handle_zero() {
     printf("Got SWI ZERO.\r\n");
@@ -11,10 +8,7 @@ int handle_zero() {
 }
 
 int handle_set_irq(unsigned int enable) {
-    unsigned int value = (~enable) << 7;
-    register int cpsr;
-    asm("MRS %0, SPSR" : "=r" (cpsr));
-    asm("MSR SPSR_c, %0" :: "r" ((cpsr & 0b01111111) | value));
+    set_irq_enabled(enable);
     return 0;
 }
 

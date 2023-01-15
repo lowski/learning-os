@@ -28,5 +28,6 @@ struct aic {
 static volatile struct aic *const aic = (struct aic *)ADDR_ADVANCED_INTERRUPT_CONTROLLER;
 
 void aic_init();
+void set_irq_enabled(unsigned int enable);
 
 #endif //LEARNING_OS_AIC_H

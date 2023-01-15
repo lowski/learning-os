@@ -6,6 +6,7 @@
 #include "memory/memory.h"
 #include "stdlib/stdio.h"
 #include "stdlib/str.h"
+#include "stdlib/threading.h"
 
 void handle_command(const char* cmd) {
     if (strcmp(cmd, "ping") == 0) {
@@ -33,19 +34,7 @@ void handle_command(const char* cmd) {
     }
 }
 
-
-// main entry point
-int main() {
-    dbgu_init();
-    init_memory();
-    aic_init();
-    scheduler_init();
-    system_timer_init();
-    printf("\033[2J\033[H");
-    printf("System initialized - switching to USR mode...\n");
-    printf("If you don't know what to do, try \"help\".\n\n");
-    switch_mode(MODE_USR);
-
+void input_loop() {
     char buf[128];
     int ibuf = 0;
     int escape_seq_remaining = 0; // number of chars remaining in escape sequence
@@ -88,16 +77,24 @@ int main() {
             printf("%c", rx);
         }
     }
+}
 
-    printf("Current mode: %b\r\n", get_current_mode());
-    cause_data_abort();
-    printf("Current mode: %b\r\n", get_current_mode());
-    cause_software_interrupt();
-    printf("Current mode: %b\r\n", get_current_mode());
-    cause_undefined_instruction();
-    printf("Current mode: %b\r\n", get_current_mode());
 
-    printf("Done.\r\n");
+// main entry point
+int main() {
+    dbgu_init();
+    init_memory();
+    aic_init();
+    scheduler_init();
+    system_timer_init();
+    printf("\033[2J\033[H");
+    printf("System initialized - switching to USR mode...\n");
+    printf("If you don't know what to do, try \"help\".\n\n");
+    switch_mode(MODE_USR);
+
+    demo_fork();
+//    request_reschedule();
+//    input_loop();
 
     for (;;);
 

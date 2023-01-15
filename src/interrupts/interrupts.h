@@ -8,4 +8,6 @@ void cause_undefined_instruction();
 void demo_interrupts();
 void demo_fork();
 
+unsigned int get_system_time_ms();
+
 #endif //LEARNING_OS_INTERRUPTS_H

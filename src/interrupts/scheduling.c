@@ -3,6 +3,7 @@
 #include "../stdlib/str.h"
 #include "../stdlib/stdio.h"
 #include "../stdlib/threading.h"
+#include "../drivers/dbgu.h"
 
 #define TCB_START 0x2F0000
 #define THREAD_STACK_SIZE 512
@@ -21,6 +22,10 @@ unsigned int get_current_thread_id() {
     return current_thread->id;
 }
 
+struct tcb *get_current_tcb() {
+    return current_thread;
+}
+
 // Kill the currently running thread.
 void kill_current_thread(void) {
     raise_swi(SWI_CODE_DISABLE_IRQ);
@@ -29,6 +34,7 @@ void kill_current_thread(void) {
 
     raise_swi(SWI_CODE_ENABLE_IRQ);
 
+    request_reschedule();
     for (;;);
 }
 
@@ -56,7 +62,9 @@ struct tcb *scheduler(void *pc, unsigned int registers[15]) {
         memcpy(current_thread->registers, registers, 15 * 4);
         asm("MRS %0, SPSR" : "=r" (current_thread->cpsr));
         current_thread->pc = pc;
-        current_thread->status = ready;
+        if (current_thread->status == running) {
+            current_thread->status = ready;
+        }
     }
 
     // select next thread
@@ -80,18 +88,22 @@ struct tcb *scheduler(void *pc, unsigned int registers[15]) {
     current_thread = next_tcb;
     current_thread_idx = next_thread_idx;
 
+    current_thread->status = running;
     return current_thread;
 }
 
 void scheduler_init(void) {
     for (int i = 0; i < MAX_THREAD_COUNT; ++i) {
         TCBS[i].sp_default = (void *) THREAD_STACK_START - (i * THREAD_STACK_SIZE);
+        TCBS[i].idx = i;
     }
     current_thread = &TCBS[0];
 
     // create idle thread
     unsigned int idle_thread_id = fork(thread_nop);
     find_tcb_by_id(idle_thread_id)->priority = idle;
+
+    threading_init();
 }
 
 void print_tcb(struct tcb *t) {
@@ -101,10 +113,35 @@ void print_tcb(struct tcb *t) {
            "  status = %d,\n"
            "  pc = %x,\n"
            "  priority = %d,\n"
-           "  registers = [\n", t->id, t->sp_default, t->status, t->pc, t->priority);
-    for (int i = 0; i < 15; ++i) {
-        printf("    %x,\n", t->registers[i]);
+           "}\n", t->id, t->sp_default, t->status, t->pc, t->priority);
+}
+
+void request_reschedule() {
+    raise_swi(SWI_CODE_RESCHEDULE);
+}
+
+void block(unsigned int tid, struct signal* s) {
+    struct tcb *t = find_tcb_by_id(tid);
+    if (t == 0) {
+        return;
     }
-    printf("  ]\n"
-           "}\n");
+    t->status = blocked;
+
+    request_reschedule();
+
+    // no idea why this is necessary. if a call to some function from another library is not present, the thread will
+    // be killed here (through kill_current_thread).
+    strlen("");
+}
+
+
+void unblock(unsigned int tid) {
+    struct tcb *t = find_tcb_by_id(tid);
+    if (t == 0) {
+        return;
+    }
+    if (t->status == blocked) {
+        t->status = ready;
+    }
+
 }
