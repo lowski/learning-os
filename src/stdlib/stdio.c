@@ -70,6 +70,13 @@ void printf(const char* fmt, ...) {
                 converted[1] = 'x';
                 converted[converted_length + 2] = '\0';
                 transmit_string(converted);
+            } else if (c == 'd') {
+                unsigned int arg = va_arg(args, unsigned int);
+                int converted_length = ilen(arg, 10);
+                char converted[converted_length + 1];
+                itoa(arg, converted, 10);
+                converted[converted_length] = '\0';
+                transmit_string(converted);
             } else if (c == 'b') {
                 unsigned int arg = va_arg(args, unsigned int);
                 int converted_length = ilen(arg, 2);
