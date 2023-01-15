@@ -122,7 +122,7 @@ void *chandler_irq(void *lr, unsigned int registers[15]) {
     aic->end_of_interrupt_command = 1;
 
     // run both instructions that were already in the pipeline again
-    registers = new_registers;
+    memcpy(registers, new_registers, 15*4);
     return next_pc;
 }
 

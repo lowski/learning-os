@@ -11,7 +11,11 @@ unsigned int thread_count = 0;
 unsigned int thread_id = 0;
 unsigned int current_thread_idx = 0;
 struct tcb *TCBS = (struct tcb *)TCB_START;
-struct tcb current_thread;
+struct tcb *current_thread;
+
+void thread_nop() {
+    for (;;) asm("NOP");
+}
 
 struct tcb *find_free_tcb() {
     for (int i = 0; i < MAX_THREAD_COUNT; ++i) {
@@ -19,6 +23,7 @@ struct tcb *find_free_tcb() {
             return &TCBS[i];
         }
     }
+    return 0;
 }
 
 void thread_nop() {
@@ -32,6 +37,9 @@ unsigned int fork(void *pc) {
     thread_count++;
 
     struct tcb *t = find_free_tcb();
+    if (t == 0) {
+        return 0;
+    }
     t->id = thread_id++;
     t->sp = t->sp_default;
     t->status = ready;
@@ -50,12 +58,12 @@ void kill(unsigned int id) {
 }
 
 struct tcb *scheduler(void *pc, unsigned int registers[15]) {
-    if (current_thread.status != not_existing) {
+    if (current_thread->status != not_existing) {
         // save context
-        memcpy(current_thread.registers, registers, 15);
-        asm("MRS %0, SPSR" : "=r" (current_thread.cpsr));
-        current_thread.pc = pc;
-        current_thread.status = ready;
+        memcpy(current_thread->registers, registers, 15 * 4);
+        asm("MRS %0, SPSR" : "=r" (current_thread->cpsr));
+        current_thread->pc = pc;
+        current_thread->status = ready;
     }
 
     // select next thread
@@ -72,16 +80,16 @@ struct tcb *scheduler(void *pc, unsigned int registers[15]) {
         return 0;
     }
 
-    current_thread = *next_tcb;
+    current_thread = next_tcb;
 
-    return &current_thread;
+    return current_thread;
 }
 
 void scheduler_init(void) {
     for (int i = 0; i < MAX_THREAD_COUNT; ++i) {
         TCBS[i].sp_default = (void *) THREAD_STACK_START - (i * THREAD_STACK_SIZE);
     }
-    current_thread = TCBS[0];
+    current_thread = &TCBS[0];
 
     // create idle thread
 //    fork(thread_nop);
