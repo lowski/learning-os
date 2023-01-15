@@ -9,7 +9,7 @@
 #define MODE_UND 0b11011 // undefined instruction
 #define MODE_SYS 0b11111 // system
 
-#define switch_mode(mode) asm("MSR CPSR_c, %0" :: "r" (mode));
+#define switch_mode(mode) asm("MSR CPSR_c, %0" :: "r" (mode))
 
 void init_memory();
 unsigned int get_current_mode();

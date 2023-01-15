@@ -44,7 +44,7 @@ int main() {
     printf("\033[2J\033[H");
     printf("System initialized - switching to USR mode...\n");
     printf("If you don't know what to do, try \"help\".\n\n");
-    switch_mode(MODE_USR)
+    switch_mode(MODE_USR);
 
     char buf[128];
     int ibuf = 0;
