@@ -1,6 +1,7 @@
 #include "interrupts.h"
 #include "../drivers/aic.h"
 #include "../drivers/dbgu.h"
+#include "../drivers/swi.h"
 #include "../drivers/system_timer.h"
 #include "../stdlib/stdio.h"
 #include "scheduling.h"
@@ -156,8 +157,13 @@ void chandler_und(void *lr) {
 __attribute__((section(".handlers")))
 void *chandler_swi(void *lr) {
     // NOTE: If the SWI is caused from the SVC mode, the original LR is lost, and we will crash.
-    printf("There was a swi interrupt!\r\n");
-    printf("Location: %p\n", lr - 4);
+
+    int not_handled = handle_swi(lr - 4);
+    if (not_handled) {
+        printf("There was an unknown swi interrupt!\r\n");
+        printf("Location: %p\n", lr - 4);
+        printf("Code: %d\n", *(unsigned int *)(lr - 4) & 255);
+    }
 
     // return to the next instruction after the one that created the interrupt.
     return lr;
