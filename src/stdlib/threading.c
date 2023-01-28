@@ -31,6 +31,7 @@ unsigned int fork(void *pc) {
     t->status = ready;
     t->pc = pc;
     t->priority = medium;
+    t->cpsr = 0b10000;
     t->registers[13] = (unsigned int)t->sp_default;
     t->registers[14] = (unsigned int)kill_current_thread;
 
@@ -54,7 +55,7 @@ unsigned int last_sleep_thread_system_time = 0;
 int sleeping_ms[MAX_THREAD_COUNT] = {0};
 struct signal sleeping_signals[MAX_THREAD_COUNT] = {};
 
-void sleep_managing_thread() {
+void sleeping_beauty() {
     for (;;) {
         unsigned int current_time = get_system_time_ms();
         unsigned int delta_ms = current_time - last_sleep_thread_system_time;
@@ -80,5 +81,5 @@ void sleep(unsigned int ms) {
 }
 
 void threading_init() {
-    fork(sleep_managing_thread);
+    fork(sleeping_beauty);
 }
