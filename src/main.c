@@ -17,13 +17,13 @@ void handle_command(const char* cmd) {
         cause_data_abort();
     } else if (strcmp(cmd, "except und") == 0) {
         cause_undefined_instruction();
-    } else if (strcmp(cmd, "demo fork") == 0) {
+    } else if (strcmp(cmd, "demo clone") == 0) {
         demo_fork();
     } else if (strcmp(cmd, "demo interrupts") == 0) {
         demo_interrupts();
     } else if (strcmp(cmd, "help") == 0) {
         printf("Commands:\n"
-               "  demo <interrupts|fork>\n"
+               "  demo <interrupts|clone>\n"
                "  except <swi|dabt|und>\n"
                "  help\n"
                "  ping\n"

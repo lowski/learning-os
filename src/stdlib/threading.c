@@ -14,7 +14,7 @@ void kill(unsigned int id) {
     }
 }
 
-unsigned int fork(void *pc) {
+unsigned int clone(void *pc) {
     struct tcb *t = find_free_tcb();
     if (t == 0) {
         return 0;
@@ -72,5 +72,5 @@ void sleep(unsigned int ms) {
 }
 
 void threading_init() {
-    fork(sleeping_beauty);
+    clone(sleeping_beauty);
 }

@@ -4,7 +4,7 @@
 #define MAX_THREAD_COUNT 16
 
 void kill(unsigned int tid);
-unsigned int fork(void *pc);
+unsigned int clone(void *pc);
 
 
 struct signal {

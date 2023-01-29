@@ -124,7 +124,7 @@ void scheduler_init(void) {
     current_thread = &TCBS[0];
 
     // create idle thread
-    unsigned int idle_thread_id = fork(thread_nop);
+    unsigned int idle_thread_id = clone(thread_nop);
     find_tcb_by_id(idle_thread_id)->priority = idle;
 
     threading_init();
