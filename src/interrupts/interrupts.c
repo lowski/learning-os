@@ -70,14 +70,9 @@ void thread_b() {
     }
 }
 
-void demo_fork() {
+void demo_threads() {
     clone(thread_a);
     clone(thread_b);
-
-    // NOPs are necessary to avoid jumping into previous instruction after interrupt
-    asm("NOP" ::: "memory");
-    asm("NOP" ::: "memory");
-    for (;;);
 }
 
 

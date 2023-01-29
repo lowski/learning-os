@@ -1,6 +1,15 @@
 #ifndef LEARNING_OS_DATATYPES_H
 #define LEARNING_OS_DATATYPES_H
 
+typedef int int32_t;
+typedef char int8_t;
+typedef int int_t;
+
+typedef unsigned int uint32_t;
+typedef unsigned char uint8_t;
+typedef unsigned int uint_t;
+typedef unsigned char bit_t;
+
 struct RingBuffer {
     unsigned int *buffer;
     unsigned int size;

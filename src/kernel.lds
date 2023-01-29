@@ -16,5 +16,7 @@ SECTIONS
 	. = 0x20000000;
 	.init : { *(.init) }
 	.text : { *(.text) }
+
+    /* master page table starts at 0x21000000 */
 }
 

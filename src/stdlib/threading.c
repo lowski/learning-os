@@ -74,6 +74,7 @@ void sleeping_beauty() {
 void sleep(unsigned int ms) {
     unsigned int idx = get_current_tcb()->idx;
     sleeping_ms[idx] = ms;
+    (&sleeping_signals[idx])->unblocked = 0;
     wait(&sleeping_signals[idx]);
 }
 
