@@ -31,6 +31,7 @@ unsigned int clone(void *pc) {
 }
 
 void signal(struct signal *s) {
+    s->unblocked = 1;
     if (s->blocked_tid != 0) {
         unblock(s->blocked_tid);
         s->blocked_tid = 0;
@@ -38,9 +39,14 @@ void signal(struct signal *s) {
 }
 
 void wait(struct signal *s) {
+    if (s->unblocked == 1) {
+        s->unblocked = 0;
+        return;
+    }
     unsigned int tid = get_current_thread_id();
     s->blocked_tid = tid;
     block(tid, s);
+    s->unblocked = 0;
 }
 
 unsigned int last_sleep_thread_system_time = 0;

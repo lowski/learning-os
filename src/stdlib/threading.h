@@ -9,6 +9,7 @@ unsigned int clone(void *pc);
 
 struct signal {
     unsigned int blocked_tid;
+    char unblocked;
 };
 void signal(struct signal *s);
 void wait(struct signal *s);

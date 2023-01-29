@@ -35,6 +35,9 @@ void handle_command(const char* cmd) {
 }
 
 void input_loop() {
+    printf("\033[2J\033[H");
+    printf("System initialized - switched to USR mode.\n");
+    printf("If you don't know what to do, try \"help\".\n\n");
     char buf[128];
     int ibuf = 0;
     int escape_seq_remaining = 0; // number of chars remaining in escape sequence
@@ -82,17 +85,15 @@ void input_loop() {
 
 // main entry point
 int main() {
-    dbgu_init();
     init_memory();
-    aic_init();
     scheduler_init();
+    aic_init();
     system_timer_init();
-    printf("\033[2J\033[H");
-    printf("System initialized - switching to USR mode...\n");
-    printf("If you don't know what to do, try \"help\".\n\n");
+    dbgu_init();
     switch_mode(MODE_USR);
 
     demo_fork();
+    clone(input_loop);
     reschedule();
 
     for (;;);
