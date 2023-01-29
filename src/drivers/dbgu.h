@@ -1,6 +1,8 @@
 #ifndef LEARNING_OS_DBGU_H
 #define LEARNING_OS_DBGU_H
 
+#include "memory.h"
+
 // DBGU memory map -> Table 26-2
 struct dbgu {
     unsigned int control; // mode; WO
@@ -56,8 +58,7 @@ struct dbgu {
 #define DBGU_MASK_IRQ_COMMTX 1 << 30
 #define DBGU_MASK_IRQ_COMMRX 1 << 31
 
-#define DBGU_ADDR 0xFFFFF200 // Figure 8-1
-static volatile struct dbgu *const dbgu = (struct dbgu *) DBGU_ADDR;
+static volatile struct dbgu *const dbgu = (struct dbgu *) MEM_ADDR_PERIPHERY_DBGU;
 
 void dbgu_init();
 void dbgu_transmit(unsigned char);

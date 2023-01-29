@@ -1,5 +1,6 @@
 #include "memory.h"
 #include "../stdlib/datatypes.h"
+#include "../stdlib/stdio.h"
 
 #define MEMORY_CONTROLLER 0xFFFFFF00
 static volatile unsigned int * const memory_controller = (unsigned int *)MEMORY_CONTROLLER;
@@ -98,16 +99,19 @@ struct __attribute__((packed)) l1_tt_section_entry {
 
 struct l1_tt_section_entry *translation_table = (struct l1_tt_section_entry*)MEM_ADDR_MASTER_PAGE_TABLE;
 
+FUNC_PRIVILEGED
 void write_mmu_dacr(struct cp15_domain_access_control_register value) {
     asm("MOV r0, %0" :: "r" (value));
     asm("MCR p15, 0, r0, c3, c0, 0");
 }
 
+FUNC_PRIVILEGED
 void write_mmu_cr(struct cp15_control_register value) {
     asm("MOV r0, %0" :: "r" (value));
     asm("MCR p15, 0, r0, c1, c0, 0");
 }
 
+FUNC_PRIVILEGED
 void write_mmu_ttb(void *ttb) {
     asm("MOV r0, %0" :: "r" (ttb));
     asm("MCR p15, 0, r0, c2, c0, 0");
@@ -119,21 +123,71 @@ unsigned int get_current_mode() {
     return cpsr & (~MODE_MASK);
 }
 
-void init_mmu() {
-    for (int i = 0; i < 4096; ++i) {
-        volatile struct l1_tt_section_entry *entry = &translation_table[i];
-        entry->address = i;
-        entry->ap = read_write;
-        entry->reserved0 = 1;
-        entry->type = section;
-    }
+/**
+ * Get the section entry for the given address.
+ *
+ * @param addr the address to get the MPT entry for
+ * @return the correct MPT entry
+ */
+FUNC_PRIVILEGED
+inline struct l1_tt_section_entry *get_mpt_section(uint32_t addr) {
+    return &translation_table[addr >> 20];
+}
 
-    // remap memory again
-    struct l1_tt_section_entry *entry = &translation_table[0];
-    entry->address = 0x002;
-    entry->ap = read_write;
+/**
+ * Write a section entry into the master page table (translation table).
+ *
+ * @param from_addr the address to remap from (onlu upper 12 bits are used)
+ * @param to_addr the physical address to remap to (only upper 12 bits are used)
+ * @param access the access for the section
+ */
+FUNC_PRIVILEGED
+void section_remap(uint32_t from_addr, uint32_t to_addr, enum l1_tt_access_control access) {
+    struct l1_tt_section_entry *entry = get_mpt_section(from_addr);
+    entry->address = to_addr >> 20;
+    entry->ap = access;
     entry->reserved0 = 1;
     entry->type = section;
+}
+
+/**
+ * Write a section entry into the master page table without any mapping.
+ */
+FUNC_PRIVILEGED
+void set_section_access(uint32_t addr, enum l1_tt_access_control access) {
+    section_remap(addr, addr, access);
+}
+
+FUNC_PRIVILEGED
+void init_mmu() {
+    // initialize sections by (1) setting 1:1 mapping, (2) forbidding user access, (3) setting section type to fault
+    for (int i = 0; i < 4096; ++i) {
+        set_section_access(i << 20, user_none);
+        get_mpt_section(i << 20)->type = fault;
+    }
+
+    // update the sections that actually should be readable
+
+    section_remap(0x0, MEM_ADDR_SECTION_IVT, user_none);
+    set_section_access(MEM_ADDR_MASTER_PAGE_TABLE, user_none);
+    set_section_access(MEM_ADDR_SPECIAL_MODE_STACKS, user_none);
+    set_section_access(MEM_ADDR_TCBS, user_none);
+    set_section_access(MEM_ADDR_THREAD_STACKS, read_write);
+
+    set_section_access(MEM_ADDR_SECTION_TEXT_PRIVILEGED, read_only);
+    set_section_access(MEM_ADDR_SECTION_TEXT_USER, read_only);
+
+    set_section_access(MEM_ADDR_PERIPHERY_AIC, user_none);
+    set_section_access(MEM_ADDR_PERIPHERY_DBGU, user_none);
+    set_section_access(MEM_ADDR_PERIPHERY_ST, user_none);
+
+    // User mode RW access to all of these things is not great but needed until all the functions are implemented using
+    // software interrupts.
+    set_section_access(MEM_ADDR_SECTION_TEXT_USER, user_read_only);
+    set_section_access(MEM_ADDR_SECTION_DATA_USER, read_write);
+    set_section_access(MEM_ADDR_THREAD_STACKS, read_write);
+    set_section_access(MEM_ADDR_TCBS, read_write);
+    set_section_access(MEM_ADDR_PERIPHERY_DBGU, read_write);
 
     write_mmu_ttb((void *) MEM_ADDR_MASTER_PAGE_TABLE);
 
@@ -145,12 +199,13 @@ void init_mmu() {
     mmu_cr.mmu_enable = 1;
     mmu_cr.dcache_enable = 0;
     mmu_cr.icache_enable = 0;
-    mmu_cr.system_protection = 0;
-    mmu_cr.rom_protection = 1;
+    mmu_cr.system_protection = 1;
+    mmu_cr.rom_protection = 0;
     mmu_cr.reserved0 = 0b1111;
     write_mmu_cr(mmu_cr);
 }
 
+FUNC_PRIVILEGED
 void init_memory() {
     // Initialize stack pointers
     switch_mode(MODE_FIQ);
@@ -172,4 +227,25 @@ void init_memory() {
     switch_mode(MODE_SVC);
 
     init_mmu();
+}
+
+void demo_mmu() {
+    printf("Accessing null pointer...\n\n");
+    asm("MOV r0, #0");
+    asm("LDR r0, [r0]");
+
+    printf("\nReading init_memory function (kernel code)...\n");
+    printf("first instruction of init_memory: %x\n", *(uint32_t *)init_memory);
+
+    printf("\nThere is no kernel data, as we unfortunately need everything in the user space (see memory.c:184).\n");
+
+    printf("\nWriting demo_mmu code...\n");
+    *(uint32_t *)demo_mmu = 0xdeadbeef;
+
+    printf("\nWe can't produce a stack overflow, as the stacks are all after one-another and currently not separated by any memory that could produce a fault.\n");
+
+    printf("\nReading non-existent address (0xefff0000)...\n");
+    printf("Value: %x\n", *(uint32_t *)0xefff0000);
+
+    printf("\nThe IVT is mapped through the translation table, which demonstrates non 1:1 mapping (see memory.c:171)\n");
 }

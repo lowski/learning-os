@@ -1,6 +1,7 @@
 #include "threading.h"
 #include "../interrupts/scheduling.h"
 #include "../interrupts/interrupts.h"
+#include "../drivers/memory.h"
 
 unsigned int thread_id = 0;
 
@@ -78,6 +79,7 @@ void sleep(unsigned int ms) {
     wait(&sleeping_signals[idx]);
 }
 
+FUNC_PRIVILEGED
 void threading_init() {
     clone(sleeping_beauty);
 }

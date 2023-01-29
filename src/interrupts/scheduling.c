@@ -56,6 +56,7 @@ struct tcb *find_tcb_by_id(unsigned int id) {
  * @param pc the instruction pointer of the thread
  * @param registers list of the registers (r0 to r14, with r0 at [0] and r14 at [14])
  */
+FUNC_PRIVILEGED
 void save_context(struct tcb *tcb, void *pc, unsigned int registers[15]) {
     if (tcb->status != not_existing) {
         memcpy(tcb->registers, registers, 15 * 4);
@@ -74,6 +75,7 @@ void save_context(struct tcb *tcb, void *pc, unsigned int registers[15]) {
  * @param registers the list of registers to where the context should be restored
  * @return the instruction pointer to return to (0 if next_tcb is 0)
  */
+FUNC_PRIVILEGED
 void *restore_context(struct tcb *next_tcb, unsigned int registers[15]) {
     void *pc = 0;
     if (next_tcb != 0) {
@@ -88,6 +90,7 @@ void *restore_context(struct tcb *next_tcb, unsigned int registers[15]) {
     return pc;
 }
 
+FUNC_PRIVILEGED
 struct tcb *select_next_thread() {
     // round-robin, but higher priority (smaller number) always takes precedence
     struct tcb *next_tcb = 0;
@@ -102,6 +105,7 @@ struct tcb *select_next_thread() {
     return next_tcb;
 }
 
+FUNC_PRIVILEGED
 void *scheduler(void *pc, unsigned int registers[15]) {
     save_context(current_thread, pc, registers);
     struct tcb *next_tcb = select_next_thread();
@@ -113,6 +117,7 @@ void *scheduler(void *pc, unsigned int registers[15]) {
     return new_pc;
 }
 
+FUNC_PRIVILEGED
 void scheduler_init(void) {
     for (int i = 0; i < MAX_THREAD_COUNT; ++i) {
         TCBS[i].sp_default = (void *) MEM_ADDR_THREAD_STACKS + (1 + i * MEM_SIZE_THREAD_STACK);

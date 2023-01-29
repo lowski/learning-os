@@ -1,6 +1,8 @@
 #ifndef LEARNING_OS_AIC_H
 #define LEARNING_OS_AIC_H
 
+#include "memory.h"
+
 struct aic {
     unsigned int source_mode[32]; // RW
     unsigned int source_vector[32]; // RW
@@ -24,8 +26,7 @@ struct aic {
     unsigned int unused1;
 };
 
-#define ADDR_ADVANCED_INTERRUPT_CONTROLLER 0xFFFFF000
-static volatile struct aic *const aic = (struct aic *)ADDR_ADVANCED_INTERRUPT_CONTROLLER;
+static volatile struct aic *const aic = (struct aic *)MEM_ADDR_PERIPHERY_AIC;
 
 void aic_init();
 void set_irq_enabled(unsigned int enable);

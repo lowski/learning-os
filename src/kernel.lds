@@ -11,13 +11,17 @@ SECTIONS
 
 	. = 0x20000000;
 	.init : { *(.init) }
+	.text_privileged : { *(.text_privileged) }
+
+	. = 0x20100000;
 	.text : { *(.text) }
+	. = 0x20200000;
+	.data : { *(.data) }
 
-
-    /* RAM (0x2000_0000 - 0x2fff_ffff) */
-    /* 0x2010_0000: master page table */
-    /* 0x2020_0000: special mode stacks (0x200 bytes each) */
-    /* 0x2030_0000: TCBs (0x80 bytes each x 16) */
-    /* 0x2040_0000: thread stacks (0x200 bytes each) */
+    /* RAM (0x2000_0000 - 0x2400_0000) */
+    /* 0x2110_0000: master page table */
+    /* 0x2120_0000: special mode stacks (0x200 bytes each) */
+    /* 0x2130_0000: TCBs (0x80 bytes each x 16) */
+    /* 0x2140_0000: thread stacks (0x200 bytes each) */
 }
 

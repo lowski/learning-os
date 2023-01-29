@@ -3,6 +3,7 @@
 #include "../stdlib/threading.h"
 #include "../interrupts/scheduling.h"
 #include "../stdlib/datatypes.h"
+#include "memory.h"
 
 unsigned char receive_buffer = 0;
 unsigned char transmit_buffer = 0;
@@ -30,6 +31,7 @@ void dbgu_transmit_thread() {
     }
 }
 
+FUNC_PRIVILEGED
 void dbgu_init(void) {
     // enable receive and transmit
     dbgu->control = (1 << 6) | (1 << 4);
@@ -58,6 +60,7 @@ unsigned char dbgu_receive() {
     return res;
 }
 
+FUNC_PRIVILEGED
 void dbgu_handle_irq() {
     if (dbgu->status.rxrdy) {
         // if the previous character has not been accessed yet, it's gone now.

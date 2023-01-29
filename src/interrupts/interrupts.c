@@ -94,6 +94,7 @@ void *chandler_fiq(void *lr) {
     return lr - 8;
 }
 
+FUNC_PRIVILEGED
 void *chandler_irq(void *lr, unsigned int registers[15]) {
     aic->interrupt_vector;
     system_time_ms += SYSTEM_TIMER_PIT_INTERVAL_MS;
@@ -162,6 +163,7 @@ void chandler_und(void *lr) {
     die();
 }
 
+FUNC_PRIVILEGED
 void *chandler_swi(void *lr, unsigned int registers[15]) {
     // NOTE: If the SWI is caused from the SVC mode, the original LR is lost, and we will crash.
     set_irq_enabled(0);

@@ -1,6 +1,8 @@
 #ifndef LEARNING_OS_SYSTEM_TIMER_H
 #define LEARNING_OS_SYSTEM_TIMER_H
 
+#include "memory.h"
+
 struct system_timer {
     unsigned int control_register; // WO
     unsigned int period_interval_mode; // RW
@@ -29,8 +31,7 @@ struct system_timer {
 
 #define SYSTEM_TIMER_PIT_INTERVAL_MS 100
 
-#define SYSTEM_TIMER_ADDR 0xFFFFFD00
-static volatile struct system_timer *const system_timer = (struct system_timer *)SYSTEM_TIMER_ADDR;
+static volatile struct system_timer *const system_timer = (struct system_timer *)MEM_ADDR_PERIPHERY_ST;
 
 void system_timer_init();
 

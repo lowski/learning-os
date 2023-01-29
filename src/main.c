@@ -21,9 +21,11 @@ void handle_command(const char* cmd) {
         demo_threads();
     } else if (strcmp(cmd, "demo interrupts") == 0) {
         demo_interrupts();
+    } else if (strcmp(cmd, "demo mmu") == 0) {
+        demo_mmu();
     } else if (strcmp(cmd, "help") == 0) {
         printf("Commands:\n"
-               "  demo <interrupts|clone>\n"
+               "  demo <interrupts|threads|mmu>\n"
                "  except <swi|dabt|und>\n"
                "  help\n"
                "  ping\n"
@@ -84,17 +86,18 @@ void input_loop() {
 
 
 // main entry point
+FUNC_PRIVILEGED
 int main() {
     init_memory();
     scheduler_init();
     aic_init();
     system_timer_init();
     dbgu_init();
-    switch_mode(MODE_USR);
 
     clone(input_loop);
     reschedule();
 
+    switch_mode(MODE_USR);
     for (;;);
 
     // we cannot return from this function, as the .init section is now shadowed by the ivt, so if we try to return
