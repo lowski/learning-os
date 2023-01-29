@@ -3,12 +3,9 @@
 #include "../stdlib/str.h"
 #include "../stdlib/stdio.h"
 #include "../stdlib/threading.h"
+#include "../drivers/memory.h"
 
-#define TCB_START 0x2F0000
-#define THREAD_STACK_SIZE 512
-#define THREAD_STACK_START 0x2FF3FF
-
-struct tcb *TCBS = (struct tcb *)TCB_START;
+struct tcb *TCBS = (struct tcb *)MEM_ADDR_TCBS;
 struct tcb *current_thread;
 
 void thread_nop() {
@@ -118,7 +115,7 @@ void *scheduler(void *pc, unsigned int registers[15]) {
 
 void scheduler_init(void) {
     for (int i = 0; i < MAX_THREAD_COUNT; ++i) {
-        TCBS[i].sp_default = (void *) THREAD_STACK_START - (i * THREAD_STACK_SIZE);
+        TCBS[i].sp_default = (void *) MEM_ADDR_THREAD_STACKS + (1 + i * MEM_SIZE_THREAD_STACK);
         TCBS[i].idx = i;
     }
     current_thread = &TCBS[0];

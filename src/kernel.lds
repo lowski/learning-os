@@ -8,15 +8,16 @@ SECTIONS
 	. = 0x00200100;
     .handlers : { *(.handlers) }
 
-    /* thread control blocks get 0x2F0000 upwards */
-    /* stacks for threads get 0x002FD400 to 0x2ff3ff */
-    /* every thread gets 512B, so 16 threads are supported */
-    /* stacks for special modes get 0x2ff400 to 0x2fffff */
 
 	. = 0x20000000;
 	.init : { *(.init) }
 	.text : { *(.text) }
 
-    /* master page table starts at 0x21000000 */
+
+    /* RAM (0x2000_0000 - 0x2fff_ffff) */
+    /* 0x2010_0000: master page table */
+    /* 0x2020_0000: special mode stacks (0x200 bytes each) */
+    /* 0x2030_0000: TCBs (0x80 bytes each x 16) */
+    /* 0x2040_0000: thread stacks (0x200 bytes each) */
 }
 

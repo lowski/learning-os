@@ -1,6 +1,8 @@
 #ifndef LEARNING_OS_SCHEDULING_H
 #define LEARNING_OS_SCHEDULING_H
 
+#include "../stdlib/datatypes.h"
+
 #define SCHEDULER_INTERVAL_MS 100
 
 enum tcb_status {
@@ -30,6 +32,8 @@ struct tcb {
     // 0 - idle thread, 1 - low, 2 - medium, 3 - high
     enum tcb_priority priority;
     struct signal* blocking_signal;
+
+    uint32_t reserved0[9]; // pad to 128 bytes length
 };
 
 /**

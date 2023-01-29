@@ -1,17 +1,12 @@
 #include "memory.h"
 #include "../stdlib/datatypes.h"
-#include "../stdlib/stdio.h"
 
 #define MEMORY_CONTROLLER 0xFFFFFF00
 static volatile unsigned int * const memory_controller = (unsigned int *)MEMORY_CONTROLLER;
 
-#define SP_START 0x002FFFFF
-#define SP_SIZE 512
-#define write_sp(index) asm("MOV %%sp, %0" :: "r" (SP_START - index * SP_SIZE));
+#define write_sp(index) asm("MOV %%sp, %0" :: "r" (MEM_ADDR_SPECIAL_MODE_STACKS + (index + 1) * MEM_SIZE_SPECIAL_MODE_STACK));
 
 #define MODE_MASK 0xFFFFFFE0
-
-#define TTB 0x21000000
 
 enum cp15_cr_endianness {
     little,
@@ -101,7 +96,7 @@ struct __attribute__((packed)) l1_tt_section_entry {
     uint_t address: 12;
 };
 
-struct l1_tt_section_entry *translation_table = (struct l1_tt_section_entry*)TTB;
+struct l1_tt_section_entry *translation_table = (struct l1_tt_section_entry*)MEM_ADDR_MASTER_PAGE_TABLE;
 
 void write_mmu_dacr(struct cp15_domain_access_control_register value) {
     asm("MOV r0, %0" :: "r" (value));
@@ -140,7 +135,7 @@ void init_mmu() {
     entry->reserved0 = 1;
     entry->type = section;
 
-    write_mmu_ttb((void *) TTB);
+    write_mmu_ttb((void *) MEM_ADDR_MASTER_PAGE_TABLE);
 
     struct cp15_domain_access_control_register mmu_da;
     mmu_da.d0 = client;
