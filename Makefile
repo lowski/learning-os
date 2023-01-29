@@ -2,10 +2,10 @@
 # SOURCE FILES
 # ============
 
-LSCRIPT = kernel.lds
-DIRS = interrupts memory serial_interface stdlib drivers
+LSCRIPT = src/kernel.lds
+DIRS = src/interrupts src/memory src/serial_interface src/stdlib src/drivers
 
-SRC_C = $(wildcard *.c $(foreach fd, $(DIRS), $(fd)/*.c))
+SRC_C = $(wildcard *.c $(foreach fd, $(DIRS), $(fd)/*.c)) src/main.c src/start.c
 SRC_S = $(wildcard *.S $(foreach fd, $(DIRS), $(fd)/*.S))
 OBJ = $(SRC_C:.c=.o) $(SRC_S:.S=.o)
 DEP = $(OBJ:.o=.d)
