@@ -53,7 +53,7 @@ void thread_a() {
         printf("Thread A (%d)\n", i);
         for (int j = 0; j < 50000000; ++j) asm("NOP");
     }
-    sleep(1000);
+    sleep(5000);
     printf("Thread A is awake.\n");
     for (int i = 0; i < 5; i++) {
         printf("Thread A (%d)\n", i);
@@ -100,7 +100,7 @@ void *chandler_fiq(void *lr) {
 }
 
 void *chandler_irq(void *lr, unsigned int registers[15]) {
-    unsigned int ivr = aic->interrupt_vector;
+    aic->interrupt_vector;
     system_time_ms += SYSTEM_TIMER_PIT_INTERVAL_MS;
     unsigned int handled = 0;
     scheduler_ready--;
@@ -124,22 +124,10 @@ void *chandler_irq(void *lr, unsigned int registers[15]) {
         printf("There was an unknown irq interrupt!\r\n");
     }
 
-    unsigned int *new_registers = 0;
     void *next_pc = lr - 8;
     if (scheduler_ready <= 0) {
         scheduler_ready = scheduler_max_interval;
-        struct tcb *next_tcb = scheduler(next_pc, registers);
-        if (next_tcb != 0) {
-            new_registers = next_tcb->registers;
-            next_pc = next_tcb->pc;
-            asm("MSR SPSR, %0" :: "r" (next_tcb->cpsr));
-        }
-    }
-
-    // run both instructions that were already in the pipeline again
-
-    if (new_registers != 0) {
-        memcpy(registers, new_registers, 15*4);
+        next_pc = scheduler(next_pc, registers);
     }
 
     aic->end_of_interrupt_command = 1;
@@ -185,19 +173,9 @@ void *chandler_swi(void *lr, unsigned int registers[15]) {
     unsigned int code = *(unsigned int *)(lr - 4) & 255;
 
     if (code == SWI_CODE_RESCHEDULE) {
-        unsigned int *new_registers = 0;
-        void *next_pc = lr;
-
         scheduler_ready = scheduler_max_interval;
-        struct tcb *next_tcb = scheduler(next_pc, registers);
-        if (next_tcb != 0) {
-            new_registers = next_tcb->registers;
-            next_pc = next_tcb->pc;
-            asm("MSR SPSR, %0" :: "r" (next_tcb->cpsr));
-        }
-        if (new_registers != 0) {
-            memcpy(registers, new_registers, 15*4);
-        }
+
+        void *next_pc = scheduler(lr, registers);
         set_irq_enabled(1);
         return next_pc;
     }

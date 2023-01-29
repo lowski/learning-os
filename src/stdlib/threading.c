@@ -1,28 +1,20 @@
 #include "threading.h"
 #include "../interrupts/scheduling.h"
 #include "../interrupts/interrupts.h"
-#include "../stdlib/stdio.h"
-#include "../stdlib/str.h"
 
-unsigned int thread_count = 0;
 unsigned int thread_id = 0;
 
 void kill(unsigned int id) {
-    printf("kill %d\n", id);
     struct tcb *t = find_tcb_by_id(id);
     if (t == 0) return;
 
-    // We ignore if the thread is currently running. It will not be stopped immediately, but will not be scheduled
-    // again.
     t->status = not_existing;
+    if (t->status == running) {
+        reschedule();
+    }
 }
 
 unsigned int fork(void *pc) {
-    if (thread_count >= MAX_THREAD_COUNT) {
-        return 0;
-    }
-    thread_count++;
-
     struct tcb *t = find_free_tcb();
     if (t == 0) {
         return 0;
@@ -69,8 +61,7 @@ void sleeping_beauty() {
                 signal(&sleeping_signals[i]);
             }
         }
-        for (int j = 0; j < 50000000; ++j) asm("NOP");
-        request_reschedule();
+        reschedule();
     }
 }
 

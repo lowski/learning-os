@@ -93,8 +93,7 @@ int main() {
     switch_mode(MODE_USR);
 
     demo_fork();
-//    request_reschedule();
-//    input_loop();
+    reschedule();
 
     for (;;);
 

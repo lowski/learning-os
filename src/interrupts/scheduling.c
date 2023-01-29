@@ -3,13 +3,10 @@
 #include "../stdlib/str.h"
 #include "../stdlib/stdio.h"
 #include "../stdlib/threading.h"
-#include "../drivers/dbgu.h"
 
 #define TCB_START 0x2F0000
 #define THREAD_STACK_SIZE 512
 #define THREAD_STACK_START 0x2FF3FF
-
-unsigned int current_thread_idx = 0;
 
 struct tcb *TCBS = (struct tcb *)TCB_START;
 struct tcb *current_thread;
@@ -34,8 +31,7 @@ void kill_current_thread(void) {
 
     raise_swi(SWI_CODE_ENABLE_IRQ);
 
-    request_reschedule();
-    for (;;);
+    reschedule();
 }
 
 struct tcb *find_free_tcb() {
@@ -56,40 +52,68 @@ struct tcb *find_tcb_by_id(unsigned int id) {
     return 0;
 }
 
-struct tcb *scheduler(void *pc, unsigned int registers[15]) {
-    if (current_thread->status != not_existing) {
-        // save context
-        memcpy(current_thread->registers, registers, 15 * 4);
-        asm("MRS %0, SPSR" : "=r" (current_thread->cpsr));
-        current_thread->pc = pc;
-        if (current_thread->status == running) {
-            current_thread->status = ready;
+/**
+ * Save the context of the current thread. If `tcb` is 0, this is a no-op.
+ *
+ * @param tcb the TCB of the thread to store the context to
+ * @param pc the instruction pointer of the thread
+ * @param registers list of the registers (r0 to r14, with r0 at [0] and r14 at [14])
+ */
+void save_context(struct tcb *tcb, void *pc, unsigned int registers[15]) {
+    if (tcb->status != not_existing) {
+        memcpy(tcb->registers, registers, 15 * 4);
+        asm("MRS %0, SPSR" : "=r" (tcb->cpsr));
+        tcb->pc = pc;
+        if (tcb->status == running) {
+            tcb->status = ready;
         }
     }
+}
 
-    // select next thread
+/**
+ * Restore the context of the next thread: PC, registers, CPSR. If `next_tcb` is 0, this is a no-op.
+ *
+ * @param next_tcb the TCB of the next thread
+ * @param registers the list of registers to where the context should be restored
+ * @return the instruction pointer to return to (0 if next_tcb is 0)
+ */
+void *restore_context(struct tcb *next_tcb, unsigned int registers[15]) {
+    void *pc = 0;
+    if (next_tcb != 0) {
+        pc = next_tcb->pc;
+        asm("MSR SPSR, %0" :: "r" (next_tcb->cpsr));
+        memcpy(registers, next_tcb->registers, 15*4);
+
+        current_thread = next_tcb;
+        current_thread->status = running;
+    }
+
+    return pc;
+}
+
+struct tcb *select_next_thread() {
     // round-robin, but higher priority (smaller number) always takes precedence
     struct tcb *next_tcb = 0;
-    unsigned int next_thread_idx = 0;
     for (int i = 0; i < MAX_THREAD_COUNT; i++) {
-        int idx = (current_thread_idx + i + 1) % MAX_THREAD_COUNT;
+        int idx = (current_thread->idx + i + 1) % MAX_THREAD_COUNT;
 
         struct tcb *t = &TCBS[idx];
         if (t->status == ready && (next_tcb == 0 || t->priority > next_tcb->priority)) {
             next_tcb = t;
-            next_thread_idx = idx;
         }
     }
+    return next_tcb;
+}
 
-    if (next_tcb == 0) {
-        return 0;
+void *scheduler(void *pc, unsigned int registers[15]) {
+    save_context(current_thread, pc, registers);
+    struct tcb *next_tcb = select_next_thread();
+    void *new_pc = restore_context(next_tcb, registers);
+
+    if (new_pc == 0) {
+        return pc;
     }
-
-    current_thread = next_tcb;
-    current_thread_idx = next_thread_idx;
-
-    current_thread->status = running;
-    return current_thread;
+    return new_pc;
 }
 
 void scheduler_init(void) {
@@ -116,7 +140,7 @@ void print_tcb(struct tcb *t) {
            "}\n", t->id, t->sp_default, t->status, t->pc, t->priority);
 }
 
-void request_reschedule() {
+void reschedule() {
     raise_swi(SWI_CODE_RESCHEDULE);
 }
 
@@ -127,11 +151,7 @@ void block(unsigned int tid, struct signal* s) {
     }
     t->status = blocked;
 
-    request_reschedule();
-
-    // no idea why this is necessary. if a call to some function from another library is not present, the thread will
-    // be killed here (through kill_current_thread).
-    strlen("");
+    reschedule();
 }
 
 
@@ -143,5 +163,4 @@ void unblock(unsigned int tid) {
     if (t->status == blocked) {
         t->status = ready;
     }
-
 }
