@@ -3,6 +3,7 @@
 
 #include "../drivers/dbgu.h"
 #include "../interrupts/interrupts.h"
+#include "../drivers/memory.h"
 
 void handle_command(const char* cmd) {
     if (strcmp(cmd, "ping") == 0) {
