@@ -26,7 +26,8 @@ handler_und:
 
 handler_swi:
     STMFD sp!,{lr}
-    STMFD sp!,{r0-r14}
+    PUSH {r0, r1} // dummy data to be replaced by user mode r13, r14
+    STMFD sp!,{r0-r12}
     ADD sp, #(13*4)
     STMIA sp, {r13,r14}^
     SUB sp, #(13*4)
@@ -55,7 +56,8 @@ handler_dabt:
 
 handler_irq:
     STMFD sp!,{lr}
-    STMFD sp!,{r0-r14}
+    PUSH {r0, r1} // dummy data to be replaced by user mode r13, r14
+    STMFD sp!,{r0-r12}
     ADD sp, #(13*4)
     STMIA sp, {r13,r14}^
     SUB sp, #(13*4)

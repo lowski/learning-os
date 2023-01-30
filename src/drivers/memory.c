@@ -3,9 +3,6 @@
 
 #include "memory.h"
 
-#define MEMORY_CONTROLLER 0xFFFFFF00
-static volatile unsigned int * const memory_controller = (unsigned int *)MEMORY_CONTROLLER;
-
 #define write_sp(index) asm("MOV %%sp, %0" :: "r" (MEM_ADDR_SPECIAL_MODE_STACKS + (index + 1) * MEM_SIZE_SPECIAL_MODE_STACK));
 
 #define MODE_MASK 0xFFFFFFE0
@@ -90,9 +87,9 @@ struct __attribute__((packed)) l1_tt_section_entry {
     bit_t reserved0: 1; // set to 1
     uint8_t domain: 4; // this can be set to 0 as we only use one domain
     bit_t reserved1: 1;
-//    bit_t ap: 2;
     enum l1_tt_access_control ap: 2;
-    uint8_t reserved2: 8;
+    uint8_t reserved2: 4;
+    uint8_t reserved3: 4;
 
     // only 12 bits for the address prefix (0x0 - 0xfff; 0 - 4096)
     uint_t address: 12;

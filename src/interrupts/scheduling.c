@@ -149,7 +149,7 @@ void reschedule() {
     raise_swi(SWI_CODE_RESCHEDULE);
 }
 
-void block(unsigned int tid, struct signal* s) {
+void block(unsigned int tid, __attribute__((unused)) struct signal* s) {
     struct tcb *t = find_tcb_by_id(tid);
     if (t == 0) {
         return;

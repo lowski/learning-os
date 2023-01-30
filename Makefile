@@ -15,7 +15,7 @@ DEP = $(OBJ:.o=.d)
 # COMPILER CONFIGURATION
 # ======================
 
-CFLAGS = -Wall -Wextra -ffreestanding -mcpu=arm920t -O2 -std=c11 -g -fasm
+CFLAGS = -Wall -Wextra -Wno-packed-bitfield-compat -ffreestanding -mcpu=arm920t -O2 -std=c11 -g -fasm
 
 CC = arm-none-eabi-gcc
 LD = arm-none-eabi-ld

@@ -67,7 +67,7 @@ void kill_current_thread();
 unsigned int get_current_thread_id();
 struct tcb *get_current_tcb();
 
-void block(unsigned int tid, __attribute__((unused)) struct signal *s);
+void block(unsigned int tid, __attribute__((unused)) __attribute__((unused)) struct signal *s);
 void unblock(unsigned int tid);
 
 void print_tcb(struct tcb* tcb);
