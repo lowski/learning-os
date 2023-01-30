@@ -26,6 +26,8 @@ RUN make -j$(nproc)
 
 FROM ubuntu:20.04 AS qemu-runner
 
+LABEL org.opencontainers.image.source https://github.com/lowski/learning-os
+
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

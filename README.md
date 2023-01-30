@@ -19,18 +19,19 @@ compile for ARM and the QEMU patched with support for the Portux 920T.
 You can use a Docker image to run QEMU, if you don't want to install it
 or it does not work on your system (e.g. Apple Silicon Mac).
 
-Build the image (might take a few minutes):
+You can either use the prebuilt image
+`ghcr.io/lowski/qemu-portux-920t:latest` or build it yourself:
 ```shell
 git clone git@git.imp.fu-berlin.de:koenigl/qemu-portux
 cd qemu-portux && git submodule init && git submodule update && cd .. 
-docker build -t qemu-runner -f docker/qemu-runner/Dockerfile .
+docker build -t qemu-portux-920 -f docker/qemu-portux-920/Dockerfile .
 rm -rf qemu-portux
 ```
 
 Then you can run the kernel:
 ```shell
 cd src
-docker run -it -v $(PWD)/kernel.elf:/kernel --name qemu --rm qemu-runner
+docker run -it -v $(PWD)/kernel.elf:/kernel --name qemu --rm qemu-portux-920
 ```
 
 ### macOS toolchain install
