@@ -1,13 +1,13 @@
-#include "stdarg.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 #include "../drivers/dbgu.h"
-#include "stdio.h"
-#include "str.h"
 
 
 void transmit_string(const char* str) {
-    int len = strlen(str);
-    for (int i = 0; i < len; ++i) {
+    unsigned int len = strlen(str);
+    for (unsigned int i = 0; i < len; ++i) {
         dbgu_transmit(str[i]);
     }
     while (dbgu->status.txempty != 1);
@@ -47,7 +47,7 @@ inline char* itoa(int value, char* str, int base) {
 }
 
 __attribute__((format(printf, 1, 2)))
-void printf(const char* fmt, ...) {
+int printf(const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
 

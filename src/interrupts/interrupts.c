@@ -1,11 +1,11 @@
+#include <stdio.h>
+#include <thread.h>
+
 #include "interrupts.h"
 #include "../drivers/aic.h"
 #include "../drivers/dbgu.h"
 #include "../drivers/swi.h"
 #include "../drivers/system_timer.h"
-#include "../stdlib/stdio.h"
-#include "../stdlib/str.h"
-#include "../stdlib/threading.h"
 #include "scheduling.h"
 
 #define INVALID_MEMORY 0x9000000

@@ -1,7 +1,7 @@
 #ifndef LEARNING_OS_SCHEDULING_H
 #define LEARNING_OS_SCHEDULING_H
 
-#include "../stdlib/datatypes.h"
+#include <stdint.h>
 
 #define SCHEDULER_INTERVAL_MS 100
 
@@ -67,7 +67,7 @@ void kill_current_thread();
 unsigned int get_current_thread_id();
 struct tcb *get_current_tcb();
 
-void block(unsigned int tid, struct signal *s);
+void block(unsigned int tid, __attribute__((unused)) struct signal *s);
 void unblock(unsigned int tid);
 
 void print_tcb(struct tcb* tcb);

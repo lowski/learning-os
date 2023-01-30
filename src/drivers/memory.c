@@ -1,6 +1,7 @@
+#include <stdio.h>
+#include <stdint.h>
+
 #include "memory.h"
-#include "../stdlib/datatypes.h"
-#include "../stdlib/stdio.h"
 
 #define MEMORY_CONTROLLER 0xFFFFFF00
 static volatile unsigned int * const memory_controller = (unsigned int *)MEMORY_CONTROLLER;

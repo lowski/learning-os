@@ -1,4 +1,4 @@
-#include "datatypes.h"
+#include "ringbuffer.h"
 
 struct RingBuffer RingBuffer_create(unsigned int size) {
     unsigned int buffer[size];

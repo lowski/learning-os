@@ -1,4 +1,4 @@
-ENTRY(_start)
+ENTRY(start)
 SECTIONS
 {
     /* IVT gets 256 bytes (0xff) */

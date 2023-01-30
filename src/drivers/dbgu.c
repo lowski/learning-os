@@ -1,8 +1,7 @@
+#include <thread.h>
+
 #include "dbgu.h"
-#include "../stdlib/stdio.h"
-#include "../stdlib/threading.h"
 #include "../interrupts/scheduling.h"
-#include "../stdlib/datatypes.h"
 #include "memory.h"
 
 unsigned char receive_buffer = 0;

@@ -1,6 +1,6 @@
-#include "str.h"
+#include <string.h>
 
-int strlen(const char* str) {
+unsigned int strlen(const char* str) {
     int i = 0;
     while (str[i] != 0) {
         i++;
@@ -8,7 +8,7 @@ int strlen(const char* str) {
     return i;
 }
 
-int strcmp(const char *str1, const char *str2) {
+unsigned int strcmp(const char *str1, const char *str2) {
     int len1 = strlen(str1);
     int len2 = strlen(str2);
 

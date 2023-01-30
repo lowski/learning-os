@@ -3,9 +3,10 @@
 # ============
 
 LSCRIPT = src/kernel.lds
-DIRS = src/interrupts src/memory src/serial_interface src/stdlib src/drivers
+DIRS = src/interrupts src/memory src/serial_interface src/lib src/drivers src/application
+INCLUDE = include/
 
-SRC_C = $(wildcard *.c $(foreach fd, $(DIRS), $(fd)/*.c)) src/main.c src/start.c
+SRC_C = $(wildcard *.c $(foreach fd, $(DIRS), $(fd)/*.c)) src/start.c
 SRC_S = $(wildcard *.S $(foreach fd, $(DIRS), $(fd)/*.S))
 OBJ = $(SRC_C:.c=.o) $(SRC_S:.S=.o)
 DEP = $(OBJ:.o=.d)
@@ -36,7 +37,7 @@ endif
 	$(CC) $(CFLAGS) -MMD -MP -o $@ -c $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -MMD -MP -o $@ -c $<
+	$(CC) $(CFLAGS) -MMD -MP -o $@ -nostdinc -isystem $(INCLUDE) -c $<
 
 kernel.elf: $(LSCRIPT) $(OBJ)
 	$(LD) -T$(LSCRIPT) -o $@ $(OBJ) $(LIBGCC)

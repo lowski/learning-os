@@ -1,11 +1,10 @@
-#ifndef LEARNING_OS_THREADING_H
-#define LEARNING_OS_THREADING_H
+#ifndef LEARNING_OS_THREAD_H
+#define LEARNING_OS_THREAD_H
 
 #define MAX_THREAD_COUNT 16
 
 void kill(unsigned int tid);
 unsigned int clone(void *pc);
-
 
 struct signal {
     unsigned int blocked_tid;
@@ -17,4 +16,4 @@ void sleep(unsigned int ms);
 
 void threading_init();
 
-#endif //LEARNING_OS_THREADING_H
+#endif //LEARNING_OS_THREAD_H

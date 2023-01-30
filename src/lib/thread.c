@@ -1,7 +1,7 @@
-#include "threading.h"
+#include <thread.h>
+
 #include "../interrupts/scheduling.h"
 #include "../interrupts/interrupts.h"
-#include "../drivers/memory.h"
 
 unsigned int thread_id = 0;
 
@@ -51,7 +51,7 @@ void wait(struct signal *s) {
 }
 
 unsigned int last_sleep_thread_system_time = 0;
-int sleeping_ms[MAX_THREAD_COUNT] = {0};
+unsigned int sleeping_ms[MAX_THREAD_COUNT] = {0};
 struct signal sleeping_signals[MAX_THREAD_COUNT] = {};
 
 void sleeping_beauty() {
@@ -77,9 +77,4 @@ void sleep(unsigned int ms) {
     sleeping_ms[idx] = ms;
     (&sleeping_signals[idx])->unblocked = 0;
     wait(&sleeping_signals[idx]);
-}
-
-FUNC_PRIVILEGED
-void threading_init() {
-    clone(sleeping_beauty);
 }

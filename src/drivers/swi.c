@@ -1,5 +1,6 @@
+#include <stdio.h>
+
 #include "swi.h"
-#include "../stdlib/stdio.h"
 #include "../drivers/aic.h"
 #include "memory.h"
 

@@ -1,12 +1,15 @@
+#include <string.h>
+#include <stdio.h>
+#include <thread.h>
+
 #include "scheduling.h"
 #include "../drivers/swi.h"
-#include "../stdlib/str.h"
-#include "../stdlib/stdio.h"
-#include "../stdlib/threading.h"
 #include "../drivers/memory.h"
 
 struct tcb *TCBS = (struct tcb *)MEM_ADDR_TCBS;
 struct tcb *current_thread;
+
+extern void sleeping_beauty();
 
 void thread_nop() {
     for (;;) asm("NOP");
@@ -129,7 +132,7 @@ void scheduler_init(void) {
     unsigned int idle_thread_id = clone(thread_nop);
     find_tcb_by_id(idle_thread_id)->priority = idle;
 
-    threading_init();
+    clone(sleeping_beauty);
 }
 
 void print_tcb(struct tcb *t) {
