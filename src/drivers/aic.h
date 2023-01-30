@@ -1,34 +1,24 @@
 #ifndef LEARNING_OS_AIC_H
 #define LEARNING_OS_AIC_H
 
-#include "memory.h"
-
-struct aic {
-    unsigned int source_mode[32]; // RW
-    unsigned int source_vector[32]; // RW
-
-    unsigned int interrupt_vector; // RO
-    unsigned int fast_interrupt_vector; // RO
-    unsigned int interrupt_status; // RO
-    unsigned int interrupt_pending; // RO
-    unsigned int interrupt_mask; // RO
-    unsigned int core_interrupt_status; // RO
-    unsigned int unused0[2];
-
-    unsigned int interrupt_enable_command; // WO
-    unsigned int interrupt_disable_command; // WO
-    unsigned int interrupt_clear_command; // WO
-    unsigned int interrupt_set_command; // WO
-    unsigned int end_of_interrupt_command; // WO
-    unsigned int spurious_interrupt_vector; // RW
-    unsigned int debug_control; // RW
-
-    unsigned int unused1;
-};
-
-static volatile struct aic *const aic = (struct aic *)MEM_ADDR_PERIPHERY_AIC;
+#include <stdint.h>
 
 void aic_init();
 void set_irq_enabled(unsigned int enable);
+
+/**
+ * Notify the AIC that an interrupt handler has started. This will block other interrupts until
+ * aic_interrupt_handler_finish() is called. Internally this will read the interrupt vector register.
+ */
+void aic_interrupt_handler_start();
+/**
+ * Notify the AIC that an interrupt handler has finished.
+ */
+void aic_interrupt_handler_finish();
+/**
+ * Check whether the AIC has triggered an interrupt.
+ * @return 0 or 1
+ */
+uint32_t aic_has_interrupted();
 
 #endif //LEARNING_OS_AIC_H

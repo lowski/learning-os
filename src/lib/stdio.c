@@ -9,7 +9,7 @@ unsigned int transmit_string(const char* str) {
     for (unsigned int i = 0; i < len; ++i) {
         dbgu_transmit(str[i]);
     }
-    while (dbgu->status.txempty != 1);
+    while (dbgu_status_tx_empty() != 1);
     return len;
 }
 
@@ -108,6 +108,6 @@ int printf(const char* fmt, ...) {
 
     va_end(args);
 
-    while (dbgu->status.txempty != 1);
+    while (dbgu_status_tx_empty() != 1);
     return (int) printed_chars;
 }

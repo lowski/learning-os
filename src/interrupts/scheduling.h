@@ -20,20 +20,20 @@ enum tcb_priority {
 };
 
 struct tcb {
-    unsigned int id;
-    unsigned int idx;
-    void *sp_default;
-    unsigned int cpsr;
+    uint32_t id;
+    uint32_t idx;
+    ptr_t sp_default;
+    uint32_t cpsr;
     enum tcb_status status;
     // r0-r12, sp (r13), lr (r14)
-    unsigned int registers[15];
-    void *pc;
+    uint32_t registers[15];
+    ptr_t pc;
 
     // 0 - idle thread, 1 - low, 2 - medium, 3 - high
     enum tcb_priority priority;
     struct signal* blocking_signal;
 
-    uint32_t reserved0[9]; // pad to 128 bytes length
+    uint32_t _reserved0[9]; // pad to 128 bytes length
 };
 
 /**

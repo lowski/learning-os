@@ -7,6 +7,7 @@
 #include "../drivers/swi.h"
 #include "../drivers/system_timer.h"
 #include "scheduling.h"
+#include "../drivers/memory.h"
 
 #define INVALID_MEMORY 0x9000000
 static volatile char* invalid_memory = (char*)INVALID_MEMORY;
@@ -96,21 +97,21 @@ void *chandler_fiq(void *lr) {
 
 FUNC_PRIVILEGED
 void *chandler_irq(void *lr, unsigned int registers[15]) {
-    aic->interrupt_vector;
+    aic_interrupt_handler_start();
     system_time_ms += SYSTEM_TIMER_PIT_INTERVAL_MS;
     unsigned int handled = 0;
     scheduler_ready--;
 
-    if (aic->interrupt_status == 1) {
+    if (aic_has_interrupted()) {
         // this means the interrupt originated with the AIC.
         // source 1 is the internal periphery.
 
-        if (system_timer->status.period_interval_timer) {
+        if (system_timer_status_pit()) {
             if (interrupt_demo_mode) {
                 printf("!\r\n");
             }
             handled = 1;
-        } else if (dbgu->status.rxrdy) {
+        } else if (dbgu_status_rx_ready()) {
             dbgu_handle_irq();
             handled = 1;
         }
@@ -126,7 +127,7 @@ void *chandler_irq(void *lr, unsigned int registers[15]) {
         next_pc = scheduler(next_pc, registers);
     }
 
-    aic->end_of_interrupt_command = 1;
+    aic_interrupt_handler_finish();
     return next_pc;
 }
 

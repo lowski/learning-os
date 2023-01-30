@@ -23,20 +23,20 @@ enum mmu_domain_access {
 };
 
 struct cp15_control_register {
-    uint_t mmu_enable: 1;
-    uint_t alignment_fault_enable: 1;
-    uint_t dcache_enable: 1;
-    uint_t reserved0: 4;
+    bit_t mmu_enable: 1;
+    bit_t alignment_fault_enable: 1;
+    bit_t dcache_enable: 1;
+    // always set to 0b1111
+    uint_t _reserved0: 4;
     enum cp15_cr_endianness endianness: 1;
     uint_t system_protection: 1;
     uint_t rom_protection: 1;
-    uint_t reserved1: 2;
+    uint_t: 2;
     uint_t icache_enable: 1;
     uint_t base_loc_exception_reg: 1;
     uint_t round_robin_replacement: 1;
-    uint_t reserved2: 1;
-    char reserved3;
-    uint_t reserved4: 6;
+    bit_t: 1;
+    uint_t: 14;
     enum cp15_cr_clocking_mode clocking_mode: 2;
 };
 
@@ -84,12 +84,12 @@ struct __attribute__((packed)) l1_tt_section_entry {
     enum l1_tt_entry_type type: 2;
     bit_t buffered: 1;
     bit_t cached: 1;
-    bit_t reserved0: 1; // set to 1
+    // always set to 1
+    bit_t reserved: 1;
     uint8_t domain: 4; // this can be set to 0 as we only use one domain
-    bit_t reserved1: 1;
+    bit_t: 1;
     enum l1_tt_access_control ap: 2;
-    uint8_t reserved2: 4;
-    uint8_t reserved3: 4;
+    uint8_t: 8;
 
     // only 12 bits for the address prefix (0x0 - 0xfff; 0 - 4096)
     uint_t address: 12;
@@ -144,7 +144,7 @@ void section_remap(uint32_t from_addr, uint32_t to_addr, enum l1_tt_access_contr
     struct l1_tt_section_entry *entry = get_mpt_section(from_addr);
     entry->address = to_addr >> 20;
     entry->ap = access;
-    entry->reserved0 = 1;
+    entry->reserved = 1;
     entry->type = section;
 }
 
@@ -199,7 +199,7 @@ void init_mmu() {
     mmu_cr.icache_enable = 0;
     mmu_cr.system_protection = 1;
     mmu_cr.rom_protection = 0;
-    mmu_cr.reserved0 = 0b1111;
+    mmu_cr._reserved0 = 0b1111;
     write_mmu_cr(mmu_cr);
 }
 
