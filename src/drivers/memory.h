@@ -31,7 +31,6 @@
 #define FUNC_PRIVILEGED __attribute__((section(".text_privileged")))
 
 void init_memory();
-void demo_mmu();
 unsigned int get_current_mode();
 
 #endif //LEARNING_OS_MEMORY_H

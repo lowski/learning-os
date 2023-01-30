@@ -9,10 +9,8 @@
 #include "scheduling.h"
 #include "../drivers/memory.h"
 
-#define INVALID_MEMORY 0x9000000
-static volatile char* invalid_memory = (char*)INVALID_MEMORY;
+extern unsigned int interrupt_demo_mode;
 
-unsigned int interrupt_demo_mode = 0;
 const unsigned int scheduler_max_interval = SCHEDULER_INTERVAL_MS / SYSTEM_TIMER_PIT_INTERVAL_MS;
 unsigned int scheduler_ready = scheduler_max_interval;
 
@@ -22,59 +20,7 @@ unsigned int get_system_time_ms() {
     return system_time_ms;
 }
 
-void cause_data_abort() {
-    *invalid_memory = 1;
-}
-
-void cause_software_interrupt() {
-    asm("SWI 0");
-}
-
-void cause_undefined_instruction() {
-    asm("LDMFD sp!,{pc}^");
-}
-
-void demo_interrupts() {
-    interrupt_demo_mode = 1;
-
-    for (;;) {
-        unsigned char c = dbgu_receive();
-
-        for (int i = 0; i < 200; ++i) {
-            printf("%c", c);
-
-            for (int j = 0; j < 1000000; ++j) asm("NOP");
-        }
-    }
-}
-
-
-void thread_a() {
-    for (int i = 0; i < 5; i++) {
-        printf("Thread A (%d)\n", i);
-        for (int j = 0; j < 50000000; ++j) asm("NOP");
-    }
-    sleep(5000);
-    printf("Thread A is awake.\n");
-    for (int i = 0; i < 5; i++) {
-        printf("Thread A (%d)\n", i);
-        for (int j = 0; j < 50000000; ++j) asm("NOP");
-    }
-}
-
 extern struct tcb *TCBS;
-
-void thread_b() {
-    for (int i = 0; i < 30; i++) {
-        printf("Thread B (%d)\n", i);
-        for (int j = 0; j < 50000000; ++j) asm("NOP");
-    }
-}
-
-void demo_threads() {
-    clone(thread_a);
-    clone(thread_b);
-}
 
 
 __attribute__((naked, section(".handlers")))

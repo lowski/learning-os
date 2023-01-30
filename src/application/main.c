@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../drivers/dbgu.h"
-#include "../interrupts/interrupts.h"
-#include "../drivers/memory.h"
+#include "demos.h"
 
 void handle_command(const char* cmd) {
     if (strcmp(cmd, "ping") == 0) {
@@ -49,7 +47,7 @@ void main() {
         if (ibuf == 0){
             printf("\r$ ");
         }
-        char rx = dbgu_receive();
+        char rx = getchar();
 
         if (escape_seq_remaining > 0) {
             escape_seq_remaining--;

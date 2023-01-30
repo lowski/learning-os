@@ -7,7 +7,7 @@
 unsigned int transmit_string(const char* str) {
     unsigned int len = strlen(str);
     for (unsigned int i = 0; i < len; ++i) {
-        dbgu_transmit(str[i]);
+        putchar(str[i]);
     }
     while (dbgu_status_tx_empty() != 1);
     return len;
@@ -88,8 +88,8 @@ int printf(const char* fmt, ...) {
                 converted[converted_length + 2] = '\0';
                 printed_chars += transmit_string(converted);
             } else {
-                dbgu_transmit('%');
-                dbgu_transmit(c);
+                putchar('%');
+                putchar(c);
                 printed_chars += 2;
             }
 
@@ -102,7 +102,7 @@ int printf(const char* fmt, ...) {
             continue;
         }
 
-        dbgu_transmit(c);
+        putchar(c);
         printed_chars++;
     }
 
@@ -110,4 +110,14 @@ int printf(const char* fmt, ...) {
 
     while (dbgu_status_tx_empty() != 1);
     return (int) printed_chars;
+}
+
+int getchar() {
+    return (int) dbgu_receive();
+}
+
+int putchar(int c) {
+    unsigned char cast = (unsigned char) c;
+    dbgu_transmit(cast);
+    return cast;
 }
