@@ -97,17 +97,26 @@ struct __attribute__((packed)) l1_tt_section_entry {
 
 struct l1_tt_section_entry *translation_table = (struct l1_tt_section_entry*)MEM_ADDR_MASTER_PAGE_TABLE;
 
+// the pointer magic is needed, as some compilers (namely the arm-none-eabi-gcc on alpine) make a mistake when inlining
+// these function resulting in an assembler error.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 FUNC_PRIVILEGED
-void write_mmu_dacr(struct cp15_domain_access_control_register value) {
-    asm("MOV r0, %0" :: "r" (value));
+static void __attribute__((noinline)) write_mmu_dacr(struct cp15_domain_access_control_register value) {
+    unsigned int cast = *(unsigned int *)&value;
+    asm("MOV r0, %0" :: "r" (cast));
     asm("MCR p15, 0, r0, c3, c0, 0");
 }
 
 FUNC_PRIVILEGED
-void write_mmu_cr(struct cp15_control_register value) {
-    asm("MOV r0, %0" :: "r" (value));
+static void __attribute__((noinline)) write_mmu_cr(struct cp15_control_register value) {
+    unsigned int cast = *(unsigned int *)&value;
+    asm("MOV r0, %0" :: "r" (cast));
     asm("MCR p15, 0, r0, c1, c0, 0");
 }
+
+#pragma GCC diagnostic pop
 
 FUNC_PRIVILEGED
 void write_mmu_ttb(void *ttb) {
