@@ -40,3 +40,14 @@ void *memcpy(void *dest, void *src, int count) {
     }
     return dest;
 }
+
+void *memset(void *str, int c, int n) {
+    for (int i = 0; i < n; ++i) {
+        ((char *) str)[i] = (char) c;
+    }
+    return str;
+}
+
+char *strcpy(char *dest, const char *src) {
+    return (char *)memcpy(dest, (void *) src, (int) strlen(src) + 1);
+}

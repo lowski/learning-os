@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void demo_mmu() {
     printf("Accessing null pointer...\n\n");
@@ -20,4 +22,13 @@ void demo_mmu() {
     printf("Value: %x\n", *(uint32_t *)0xefff0000);
 
     printf("\nThe IVT is mapped through the translation table, which demonstrates non 1:1 mapping (see memory.c:171)\n");
+}
+
+void demo_malloc() {
+    printf("Allocating 16 bytes and setting 15 to '_'...\n");
+    char *ptr = (char *) malloc(16);
+    memset(ptr, '_', 15);
+    printf("Address: %x, value: %s\n", ptr, ptr);
+    printf("Writing to [16]...\n");
+    ptr[16] = 'c';
 }

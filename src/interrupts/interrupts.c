@@ -93,8 +93,7 @@ void *chandler_pfabt(void *lr) {
 
 __attribute__((section(".handlers")))
 void *chandler_dabt(void *lr) {
-    printf("There was a data abt interrupt!\r\n");
-    printf("Location: %p\n", lr - 8);
+    printf("[ERROR] Illegal memory access of %x (location: %x)\r\n", mmu_get_fault_address(), lr - 8);
 
     // skip the instruction that created the interrupt (which is 2 behind)
     return lr - 4;
@@ -124,12 +123,7 @@ void *chandler_swi(void *lr, unsigned int registers[15]) {
         return next_pc;
     }
 
-    int not_handled = handle_swi(lr - 4);
-    if (not_handled) {
-        printf("There was an unknown swi interrupt!\r\n");
-        printf("Location: %p\n", lr - 4);
-        printf("Code: %d\n", *(unsigned int *)(lr - 4) & 255);
-    }
+    handle_swi(lr - 4, registers);
 
     // return to the next instruction after the one that created the interrupt.
     set_irq_enabled(1);

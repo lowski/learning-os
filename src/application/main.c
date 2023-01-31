@@ -18,9 +18,11 @@ void handle_command(const char* cmd) {
         demo_interrupts();
     } else if (strcmp(cmd, "demo mmu") == 0) {
         demo_mmu();
+    } else if (strcmp(cmd, "demo malloc") == 0) {
+        demo_malloc();
     } else if (strcmp(cmd, "help") == 0) {
         printf("Commands:\n"
-               "  demo <interrupts|threads|mmu>\n"
+               "  demo <interrupts|threads|mmu|malloc>\n"
                "  except <swi|dabt|und>\n"
                "  help\n"
                "  ping\n"

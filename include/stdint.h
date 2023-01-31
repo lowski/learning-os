@@ -13,5 +13,6 @@ typedef unsigned int uint32_t;
 typedef uint32_t uint_t;
 
 typedef void *ptr_t;
+#define NULL 0
 
 #endif //LEARNING_OS_STDINT_H

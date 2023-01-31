@@ -23,5 +23,6 @@ SECTIONS
     /* 0x2120_0000: special mode stacks (0x200 bytes each) */
     /* 0x2130_0000: TCBs (0x80 bytes each x 16) */
     /* 0x2140_0000: thread stacks (0x200 bytes each) */
+    /* 0x2200_0000: heap */
 }
 
