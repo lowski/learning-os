@@ -43,4 +43,12 @@ ptr_t mmu_get_fault_address();
 ptr_t mem_malloc(uint32_t size);
 void mem_free(ptr_t ptr);
 
+/**
+ * Swap the memory heap between processes. This will remove access to all pages that belong to other processes and
+ * map the pages belonging to the new process into memory.
+ *
+ * @param pid the PID of the new process.
+ */
+void mem_swap_heap(uint32_t pid);
+
 #endif //LEARNING_OS_MEMORY_H

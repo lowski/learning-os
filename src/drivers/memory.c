@@ -439,3 +439,16 @@ void mem_free(ptr_t ptr) {
         }
     }
 }
+
+FUNC_PRIVILEGED
+void mem_swap_heap(uint32_t pid) {
+    for (int i = 0; i < MAX_ALLOCATIONS; ++i) {
+        struct allocation *alloc = &allocation_table[i];
+        if (alloc->pid != pid) {
+            set_tiny_page_access(alloc->logical_ptr , privileged_limited);
+        } else {
+            tiny_page_remap(alloc->logical_ptr, alloc->physical_ptr, read_write);
+        }
+    }
+    invalidate_tlb();
+}

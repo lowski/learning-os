@@ -88,6 +88,8 @@ void *restore_context(struct tcb *next_tcb, unsigned int registers[15]) {
 
         current_thread = next_tcb;
         current_thread->status = running;
+
+        mem_swap_heap(next_tcb->id);
     }
 
     return pc;

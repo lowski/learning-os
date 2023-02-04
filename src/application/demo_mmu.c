@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <thread.h>
 
 void demo_mmu() {
     printf("Accessing null pointer...\n\n");
@@ -23,12 +24,23 @@ void demo_mmu() {
 
     printf("\nThe IVT is mapped through the translation table, which demonstrates non 1:1 mapping (see memory.c:171)\n");
 }
+char *ptr = NULL;
+
+void alt_thread() {
+    printf("[alt_thread] Accessing ptr...\n");
+    printf("[alt_thread] Value at *ptr: %x\n", *ptr);
+}
 
 void demo_malloc() {
     printf("Allocating 16 bytes and setting 15 to '_'...\n");
-    char *ptr = (char *) malloc(16);
+    ptr = (char *) malloc(16);
     memset(ptr, '_', 15);
     printf("Address: %x, value: %s\n", ptr, ptr);
     printf("Writing to [16]...\n");
     ptr[16] = 'c';
+
+    printf("\nSpawning second thread...\n");
+    clone(alt_thread);
+    sleep(1000);
+    free(ptr);
 }
