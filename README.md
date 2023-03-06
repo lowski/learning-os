@@ -1,5 +1,19 @@
 # Learning OS
 
+A complete operating system kernel for the Portux-920T (a dev-kit
+computer used in education). The OS has no dependencies, everything is
+written from scratch (only exception: stdarg.h for variadic functions).
+It can be compiled using ARM GCC and runs on a QEMU emulator with a
+custom patch for the Portux-920T.
+
+Implemented Features:
+- console I/O
+- interrupt/exception handling
+- multithreading/scheduling
+- memory management/virtualization
+
+## Running
+
 Compile and run the kernel via QEMU: 
 ```shell
 $ cd src
